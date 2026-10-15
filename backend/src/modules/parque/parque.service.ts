@@ -29,5 +29,9 @@ export class ParqueService {
         if (!this.estaAbierto(fechaVisita)) {
             throw new Error('El parque está cerrado en la fecha seleccionada.');
         }
+        const limiteAnticipacion = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
+        if (visita > limiteAnticipacion) {
+            throw new Error('No se pueden comprar entradas con más de un mes de anticipación.');
+        }
     }
 }
