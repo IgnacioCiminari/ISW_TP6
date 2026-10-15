@@ -52,5 +52,11 @@ describe('ParqueService', () => {
         );
     });
 
+    it('rechaza una fecha con más de un mes de anticipación', () => {
+        expect(() => parque.validarFechaVisita(fecha(2026, 11, 15), ahora)).toThrow(
+            'No se pueden comprar entradas con más de un mes de anticipación.',
+        );
+    });
+
   });
 });
