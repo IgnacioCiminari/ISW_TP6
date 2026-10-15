@@ -15,4 +15,8 @@ export class ParqueService {
         const esLunes = fecha.getDay() === 1;
         return !esLunes && !this.esFeriado(fecha);
     }
+
+    validarFechaVisita(fechaVisita: Date, ahora: Date = new Date()): void {
+        throw new Error('No implementado');
+    } 
 }
