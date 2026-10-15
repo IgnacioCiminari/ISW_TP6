@@ -26,7 +26,7 @@ describe('PagosService', () => {
       [59, 'REGULAR', 10000],
       [60, 'VIP', 10000],
       [85, 'REGULAR', 5000],
-    ])('un visitante de %i años con pase %s paga $%i', (edad, tipoPase, precioEsperado) => {
+    ])('debe un visitante de %i años con pase %s pagar $%i', (edad, tipoPase, precioEsperado) => {
       expect(pagos.calcularPrecioEntrada(edad, tipoPase)).toBe(precioEsperado);
     });
 
