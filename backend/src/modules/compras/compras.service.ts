@@ -18,6 +18,13 @@ export class ComprasService {
       detalle,
     });
     const pago = await this.iniciarPago(numeroOrden, detalle.total, formaPago);
+    await this.deps.notificador.enviarConfirmacion(email, {
+      numeroOrden,
+      fechaVisita,
+      cantidadEntradas: CANTIDAD_ENTRADAS,
+      formaPago,
+      detalle,
+    });
 
     return {
       numeroOrden,
