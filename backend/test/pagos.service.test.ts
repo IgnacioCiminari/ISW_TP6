@@ -37,5 +37,15 @@ describe('PagosService', () => {
         urlRedireccion: URL_MP,
       });
     });
+
+    it('rechaza una forma de pago no soportada', async () => {
+      const pagos = new PagosService(crearPasarelaFalsa());
+
+      await expect(pagos.procesarPago('ORD-0001', 25000, 'CHEQUE' as FormaPago)).rejects.toThrow(
+        'Forma de pago no soportada.',
+      );
+    });
+
+    
   });
 });
