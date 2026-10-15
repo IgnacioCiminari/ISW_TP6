@@ -12,31 +12,18 @@ export class PagosService {
     constructor(private readonly pasarela: PasarelaPago) {}
 
     calcularPrecioEntrada(edad: number, tipoPase: TipoPase): number {
+        const precioBase = PRECIO_ENTRADA_POR_PASE[tipoPase]
 
-        if (edad >= 0 && edad <= EDAD_MAX_NINOS_GRATIS) {
+        if (edad <= EDAD_MAX_NINOS_GRATIS) {
             return PRECIO_ENTRADA_GRATIS
         }
 
-        if (edad <= EDAD_MAX_MENORES_DESCUENTO) {
-            if (tipoPase === 'REGULAR') {
-                return PRECIO_ENTRADA_POR_PASE.REGULAR * FACTOR_DESCUENTO_MEDIA_ENTRADA
-            } else {
-                return PRECIO_ENTRADA_POR_PASE.VIP * FACTOR_DESCUENTO_MEDIA_ENTRADA
-            }
+        const pagaMediaEntrada =
+            edad <= EDAD_MAX_MENORES_DESCUENTO || edad >= EDAD_MIN_JUBILADOS_DESCUENTO
+        if (pagaMediaEntrada) {
+            return precioBase * FACTOR_DESCUENTO_MEDIA_ENTRADA
         }
 
-        if (EDAD_MAX_MENORES_DESCUENTO < edad && edad < EDAD_MIN_JUBILADOS_DESCUENTO) {
-            if (tipoPase === 'VIP') {
-                return PRECIO_ENTRADA_POR_PASE.VIP
-            } else {
-                return PRECIO_ENTRADA_POR_PASE.REGULAR
-            }
-        } else {
-            if (tipoPase === 'VIP') {
-                return PRECIO_ENTRADA_POR_PASE.VIP * FACTOR_DESCUENTO_MEDIA_ENTRADA
-            } else {
-                return PRECIO_ENTRADA_POR_PASE.REGULAR * FACTOR_DESCUENTO_MEDIA_ENTRADA
-            }
-        }
+        return precioBase
     }
 }
