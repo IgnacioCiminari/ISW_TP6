@@ -36,5 +36,11 @@ describe('PagosService', () => {
       );
     });
 
+    it('debe rechazar un tipo de pase inexistente', () => {
+      expect(() => pagos.calcularPrecioEntrada(30, 'PLATINO' as TipoPase)).toThrow(
+        'El tipo de pase debe ser VIP o REGULAR.',
+      );
+    });
+
   });
 });
