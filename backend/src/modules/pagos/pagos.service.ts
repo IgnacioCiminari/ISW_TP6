@@ -5,11 +5,7 @@ export class PagosService {
 
     calcularPrecioEntrada(edad: number, tipoPase: TipoPase): number {
 
-        if (edad === 0) {
-            return 0
-        }
-
-        if (edad === 3) {
+        if (edad >= 0 && edad <= 3) {
             return 0
         }
 
