@@ -26,6 +26,9 @@ const PAGO_TARJETA: ResultadoPago = {
 
 const PAGO_EFECTIVO: ResultadoPago = { formaPago: 'EFECTIVO', estado: 'PENDIENTE_EN_BOLETERIA' };
 
+const visitantes = (cantidad: number): Visitante[] =>
+  Array.from({ length: cantidad }, () => ({ edad: 30, tipoPase: 'REGULAR' }));
+
 const solicitudValida = (cambios: Partial<SolicitudCompra> = {}): SolicitudCompra => ({
   email: EMAIL,
   fechaVisita: FECHA_VISITA,
@@ -144,6 +147,14 @@ describe('ComprasService.comprarEntradas', () => {
       await servicio.comprarEntradas(solicitudValida());
 
       expect(deps.parque.validarFechaVisita).toHaveBeenCalledWith(FECHA_VISITA);
+    });
+
+    it('permite comprar 10 entradas en una sola transacción', async () => {
+      const servicio = new ComprasService(crearDependencias());
+
+      await expect(
+        servicio.comprarEntradas(solicitudValida({ cantidad: 10, visitantes: visitantes(10) })),
+      ).resolves.toMatchObject({ cantidadEntradas: 10 });
     });
   });
 });
