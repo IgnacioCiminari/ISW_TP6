@@ -16,6 +16,7 @@ export class ComprasService {
 
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
     const { email, fechaVisita, visitantes, formaPago } = solicitud;
+    this.deps.parque.validarFechaVisita(fechaVisita);
     const detalle = this.deps.pagos.calcularDetalle(visitantes);
     const numeroOrden = await this.deps.compras.guardar({
       email,
