@@ -9,11 +9,14 @@ export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
 
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
+    const pago = await this.deps.pagos.procesarPago(NUMERO_ORDEN, TOTAL, 'TARJETA');
+
     return {
       numeroOrden: NUMERO_ORDEN,
       cantidadEntradas: CANTIDAD_ENTRADAS,
       fechaVisita: solicitud.fechaVisita,
       total: TOTAL,
+      pago,
     };
   }
 }
