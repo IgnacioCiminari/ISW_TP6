@@ -22,5 +22,9 @@ describe('ParqueService', () => {
     it('está cerrado el 25 de diciembre', () => {
       expect(parque.estaAbierto(fecha(2026, 12, 25))).toBe(false);
     });
+
+    it('está cerrado el 1 de enero', () => {
+      expect(parque.estaAbierto(fecha(2027, 1, 1))).toBe(false);
+    });
   });
 });
