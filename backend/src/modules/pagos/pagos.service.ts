@@ -1,4 +1,4 @@
-import type { DetallePrecio, PasarelaPago, TipoPase, Visitante } from './pagos.types';
+import type { DetallePrecio, PasarelaPago, Subtotal, TipoPase, Visitante } from './pagos.types';
 import {
     PRECIO_ENTRADA_POR_PASE,
     PRECIO_ENTRADA_GRATIS,
@@ -37,6 +37,25 @@ export class PagosService {
     }
 
     calcularDetalle(visitantes: Visitante[]): DetallePrecio {
-        throw Error("No implementado")
+
+        const subtotales: Subtotal[] = []
+        let precioTotal: number = 0
+
+        for (const visitante of visitantes) {
+            const precioVisitante = this.calcularPrecioEntrada(visitante.edad, visitante.tipoPase)
+            precioTotal += precioVisitante
+            const subtotal: Subtotal = {
+                edad: visitante.edad,
+                tipoPase: visitante.tipoPase,
+                precio: precioVisitante
+            }
+            subtotales.push(subtotal)
+        }
+
+        return {
+            subtotales: subtotales,
+            total: precioTotal
+        }
+
     }
 }
