@@ -1,8 +1,8 @@
 
 export class ParqueService {
-    private static readonly LUNES = 1;
-    
     estaAbierto(fecha: Date): boolean {
-        return fecha.getDay() !== ParqueService.LUNES;
+        if (fecha.getDay() === 1) return false;
+        if (fecha.getMonth() === 11 && fecha.getDate() === 25) return false; // 25 dic
+        return true;
     }
 }
