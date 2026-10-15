@@ -34,7 +34,14 @@ export class ParqueService {
             throw new Error('El parque está cerrado en la fecha seleccionada.');
         }
         if (visita > this.calcularLimiteAnticipacion(hoy)) {
-        throw new Error('No se pueden comprar entradas con más de un mes de anticipación.');
+            throw new Error('No se pueden comprar entradas con más de un mes de anticipación.');
+        }
+        if (visita.getTime() === hoy.getTime()) {
+            const hora = ahora.getHours();
+            const minuto = ahora.getMinutes();
+            if (hora > 17 || (hora === 17 && minuto > 30)) {
+            throw new Error('Las entradas para el día actual solo pueden comprarse hasta las 17:30.');
+            }
         }
     }
 }
