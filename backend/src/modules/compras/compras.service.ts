@@ -15,8 +15,9 @@ export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
 
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
+    this.validarSolicitud(solicitud);
+
     const { email, fechaVisita, visitantes, formaPago } = solicitud;
-    this.deps.parque.validarFechaVisita(fechaVisita);
     const detalle = this.deps.pagos.calcularDetalle(visitantes);
     const numeroOrden = await this.deps.compras.guardar({
       email,
@@ -42,6 +43,10 @@ export class ComprasService {
       total: detalle.total,
       pago,
     };
+  }
+
+  private validarSolicitud(solicitud: SolicitudCompra): void {
+    this.deps.parque.validarFechaVisita(solicitud.fechaVisita);
   }
 
   private iniciarPago(
