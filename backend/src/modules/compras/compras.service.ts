@@ -1,6 +1,7 @@
 import type { FormaPago, ResultadoPago } from '../pagos/pagos.types';
 import type {
   DependenciasCompras,
+  NuevaCompra,
   ResultadoCompra,
   ResumenCompra,
   SolicitudCompra,
@@ -16,7 +17,7 @@ export class ComprasService {
 
     const { email, fechaVisita, cantidad, visitantes, formaPago } = solicitud;
     const detalle = this.deps.pagos.calcularDetalle(visitantes);
-    const numeroOrden = await this.deps.compras.guardar({
+    const numeroOrden = await this.registrarCompra({
       email,
       fechaVisita,
       visitantes,
@@ -44,6 +45,10 @@ export class ComprasService {
 
   private validarSolicitud(solicitud: SolicitudCompra): void {
     this.deps.parque.validarFechaVisita(solicitud.fechaVisita);
+  }
+
+  private registrarCompra(compra: NuevaCompra): Promise<string> {
+    return this.deps.compras.guardar(compra);
   }
 
   private iniciarPago(

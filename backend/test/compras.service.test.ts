@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ComprasService } from '../src/modules/compras/compras.service';
-import type { NuevaCompra, ResumenCompra, SolicitudCompra } from '../src/modules/compras/compras.types';
+import type {
+  NuevaCompra,
+  ResumenCompra,
+  SolicitudCompra,
+} from '../src/modules/compras/compras.types';
 import type { DetallePrecio, ResultadoPago, Visitante } from '../src/modules/pagos/pagos.types';
 
 // Tests unitarios: parque, pagos, repositorios y mail son fakes,
