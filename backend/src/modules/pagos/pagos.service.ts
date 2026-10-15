@@ -39,14 +39,13 @@ export class PagosService {
     calcularDetalle(visitantes: Visitante[]): DetallePrecio {
 
         const subtotales: Subtotal[] = []
-        let precioTotal: number = 0
+        let precioTotal = 0
 
         for (const visitante of visitantes) {
             const precioVisitante = this.calcularPrecioEntrada(visitante.edad, visitante.tipoPase)
             precioTotal += precioVisitante
             const subtotal: Subtotal = {
-                edad: visitante.edad,
-                tipoPase: visitante.tipoPase,
+                ...visitante,
                 precio: precioVisitante
             }
             subtotales.push(subtotal)
