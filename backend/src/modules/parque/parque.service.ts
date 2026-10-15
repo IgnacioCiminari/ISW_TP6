@@ -1,9 +1,9 @@
 
 export class ParqueService {
     private esFeriado(fecha: Date): boolean {
-        const mes = fecha.getMonth(); // 0-indexed
+        const mes = fecha.getMonth();
         const dia = fecha.getDate();
-        return (mes === 11 && dia === 25); // 25 dic
+        return (mes === 11 && dia === 25) || (mes === 0 && dia === 1);
     }
 
     estaAbierto(fecha: Date): boolean {
