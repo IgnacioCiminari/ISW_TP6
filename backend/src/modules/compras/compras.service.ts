@@ -8,9 +8,6 @@ import type {
 
 const PREFIJO_QR = 'QR-';
 
-// Valor provisorio: el próximo test que cambie la cantidad lo reemplaza por la de la solicitud.
-const CANTIDAD_ENTRADAS = 2;
-
 export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
 
@@ -30,7 +27,7 @@ export class ComprasService {
     await this.notificarCompra(email, {
       numeroOrden,
       fechaVisita,
-      cantidadEntradas: CANTIDAD_ENTRADAS,
+      cantidadEntradas: solicitud.cantidad,
       formaPago,
       detalle,
       codigoQR: this.generarCodigoQR(numeroOrden),
@@ -38,7 +35,7 @@ export class ComprasService {
 
     return {
       numeroOrden,
-      cantidadEntradas: CANTIDAD_ENTRADAS,
+      cantidadEntradas: solicitud.cantidad,
       fechaVisita,
       total: detalle.total,
       pago,
