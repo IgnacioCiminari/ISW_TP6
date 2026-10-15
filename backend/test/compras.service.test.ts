@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ComprasService } from '../src/modules/compras/compras.service';
-import type { SolicitudCompra } from '../src/modules/compras/compras.types';
-import type { ResultadoPago } from '../src/modules/pagos/pagos.types';
+import type { NuevaCompra, SolicitudCompra } from '../src/modules/compras/compras.types';
+import type { DetallePrecio, ResultadoPago, Visitante } from '../src/modules/pagos/pagos.types';
 
 // Tests unitarios: parque, pagos, repositorios y mail son fakes,
 // así ComprasService se puede desarrollar sin esperar a los otros módulos.
@@ -9,6 +9,14 @@ import type { ResultadoPago } from '../src/modules/pagos/pagos.types';
 const EMAIL = 'visitante@mail.com';
 const FECHA_VISITA = new Date(2026, 9, 15); // jueves 15/10/2026
 const URL_MP = 'https://sandbox.mercadopago.com.ar/checkout?pref_id=pref-123';
+
+const DETALLE: DetallePrecio = {
+  subtotales: [
+    { edad: 35, tipoPase: 'VIP', precio: 20000 },
+    { edad: 10, tipoPase: 'REGULAR', precio: 5000 },
+  ],
+  total: 25000,
+};
 
 const PAGO_TARJETA: ResultadoPago = {
   formaPago: 'TARJETA',
@@ -18,7 +26,7 @@ const PAGO_TARJETA: ResultadoPago = {
 
 const PAGO_EFECTIVO: ResultadoPago = { formaPago: 'EFECTIVO', estado: 'PENDIENTE_EN_BOLETERIA' };
 
-const solicitudValida =(cambios: Partial<SolicitudCompra> = {}): SolicitudCompra => ({
+const solicitudValida = (cambios: Partial<SolicitudCompra> = {}): SolicitudCompra => ({
   email: EMAIL,
   fechaVisita: FECHA_VISITA,
   cantidad: 2,
@@ -32,7 +40,11 @@ const solicitudValida =(cambios: Partial<SolicitudCompra> = {}): SolicitudCompra
 
 const crearDependencias = () => ({
   pagos: {
+    calcularDetalle: vi.fn<(visitantes: Visitante[]) => DetallePrecio>().mockReturnValue(DETALLE),
     procesarPago: vi.fn<() => Promise<ResultadoPago>>().mockResolvedValue(PAGO_TARJETA),
+  },
+  compras: {
+    guardar: vi.fn<(compra: NuevaCompra) => Promise<string>>().mockResolvedValue('ORD-0001'),
   },
 });
 
@@ -70,6 +82,23 @@ describe('ComprasService.comprarEntradas', () => {
 
       expect(deps.pagos.procesarPago).toHaveBeenCalledWith('ORD-0001', 25000, 'EFECTIVO');
       expect(resultado.pago).toEqual(PAGO_EFECTIVO);
+    });
+
+    it('registra la compra con sus visitantes, forma de pago y detalle de precios', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
+      const solicitud = solicitudValida();
+
+      await servicio.comprarEntradas(solicitud);
+
+      expect(deps.pagos.calcularDetalle).toHaveBeenCalledWith(solicitud.visitantes);
+      expect(deps.compras.guardar).toHaveBeenCalledWith({
+        email: EMAIL,
+        fechaVisita: FECHA_VISITA,
+        visitantes: solicitud.visitantes,
+        formaPago: 'TARJETA',
+        detalle: DETALLE,
+      });
     });
   });
 });
