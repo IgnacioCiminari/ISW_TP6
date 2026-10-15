@@ -14,6 +14,10 @@ export class PagosService {
     calcularPrecioEntrada(edad: number, tipoPase: TipoPase): number {
         const precioBase = PRECIO_ENTRADA_POR_PASE[tipoPase]
 
+        if (edad < 0) {
+            throw Error('La edad del visitante no es válida.')
+        }
+
         if (edad <= EDAD_MAX_NINOS_GRATIS) {
             return PRECIO_ENTRADA_GRATIS
         }
