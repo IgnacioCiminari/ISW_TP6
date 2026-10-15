@@ -30,5 +30,11 @@ describe('PagosService', () => {
       expect(pagos.calcularPrecioEntrada(edad, tipoPase)).toBe(precioEsperado);
     });
 
+    it('debe rechazar una edad negativa', () => {
+      expect(() => pagos.calcularPrecioEntrada(-1, 'REGULAR')).toThrow(
+        'La edad del visitante no es válida.',
+      );
+    });
+
   });
 });
