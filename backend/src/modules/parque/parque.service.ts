@@ -12,8 +12,7 @@ export class ParqueService {
     }
 
     estaAbierto(fecha: Date): boolean {
-        if (fecha.getDay() === 1) return false;
-        if (this.esFeriado(fecha)) return false;
-        return true;
+        const esLunes = fecha.getDay() === 1;
+        return !esLunes && !this.esFeriado(fecha);
     }
 }
