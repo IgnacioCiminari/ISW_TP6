@@ -40,5 +40,11 @@ describe('ParqueService', () => {
       expect(() => parque.validarFechaVisita(fecha(2026, 10, 15), ahora)).not.toThrow();
     });
 
+    it('rechaza una fecha anterior al día actual', () => {
+        expect(() => parque.validarFechaVisita(fecha(2026, 10, 13), ahora)).toThrow(
+            'La fecha de visita no puede ser anterior al día actual.',
+        );
+    });
+
   });
 });
