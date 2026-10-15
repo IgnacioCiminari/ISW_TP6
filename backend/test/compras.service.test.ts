@@ -39,6 +39,7 @@ const solicitudValida = (cambios: Partial<SolicitudCompra> = {}): SolicitudCompr
 });
 
 const crearDependencias = () => ({
+  parque: { validarFechaVisita: vi.fn<(fechaVisita: Date, ahora?: Date) => void>() },
   pagos: {
     calcularDetalle: vi.fn<(visitantes: Visitante[]) => DetallePrecio>().mockReturnValue(DETALLE),
     procesarPago: vi.fn<() => Promise<ResultadoPago>>().mockResolvedValue(PAGO_TARJETA),
@@ -134,6 +135,15 @@ describe('ComprasService.comprarEntradas', () => {
       const [, resumen] = deps.notificador.enviarConfirmacion.mock.calls[0]!;
       expect(resumen.codigoQR).toEqual(expect.any(String));
       expect(resumen.codigoQR.length).toBeGreaterThan(0);
+    });
+
+    it('valida la fecha de visita contra las reglas del parque', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
+
+      await servicio.comprarEntradas(solicitudValida());
+
+      expect(deps.parque.validarFechaVisita).toHaveBeenCalledWith(FECHA_VISITA);
     });
   });
 });

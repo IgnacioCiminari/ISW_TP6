@@ -35,6 +35,9 @@ export interface ResultadoCompra {
 
 // Colaboradores inyectados por constructor. Se agregan a medida que los tests los piden.
 export interface DependenciasCompras {
+  parque: {
+    validarFechaVisita(fechaVisita: Date, ahora?: Date): void;
+  };
   pagos: {
     calcularDetalle(visitantes: Visitante[]): DetallePrecio;
     procesarPago(numeroOrden: string, total: number, formaPago: FormaPago): Promise<ResultadoPago>;
