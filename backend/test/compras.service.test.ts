@@ -16,7 +16,9 @@ const PAGO_TARJETA: ResultadoPago = {
   urlRedireccion: URL_MP,
 };
 
-const solicitudValida = (cambios: Partial<SolicitudCompra> = {}): SolicitudCompra => ({
+const PAGO_EFECTIVO: ResultadoPago = { formaPago: 'EFECTIVO', estado: 'PENDIENTE_EN_BOLETERIA' };
+
+const solicitudValida =(cambios: Partial<SolicitudCompra> = {}): SolicitudCompra => ({
   email: EMAIL,
   fechaVisita: FECHA_VISITA,
   cantidad: 2,
@@ -57,6 +59,17 @@ describe('ComprasService.comprarEntradas', () => {
 
       expect(deps.pagos.procesarPago).toHaveBeenCalledWith('ORD-0001', 25000, 'TARJETA');
       expect(resultado.pago).toEqual(PAGO_TARJETA);
+    });
+
+    it('con efectivo deja el pago pendiente en boletería', async () => {
+      const deps = crearDependencias();
+      deps.pagos.procesarPago.mockResolvedValue(PAGO_EFECTIVO);
+      const servicio = new ComprasService(deps);
+
+      const resultado = await servicio.comprarEntradas(solicitudValida({ formaPago: 'EFECTIVO' }));
+
+      expect(deps.pagos.procesarPago).toHaveBeenCalledWith('ORD-0001', 25000, 'EFECTIVO');
+      expect(resultado.pago).toEqual(PAGO_EFECTIVO);
     });
   });
 });

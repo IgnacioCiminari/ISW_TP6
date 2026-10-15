@@ -7,8 +7,6 @@ export interface Visitante {
   tipoPase: TipoPase;
 }
 
-export interface ResultadoPago {
-  formaPago: FormaPago;
-  estado: 'REDIRIGIDO_A_MERCADO_PAGO';
-  urlRedireccion: string;
-}
+export type ResultadoPago =
+  | { formaPago: 'TARJETA'; estado: 'REDIRIGIDO_A_MERCADO_PAGO'; urlRedireccion: string }
+  | { formaPago: 'EFECTIVO'; estado: 'PENDIENTE_EN_BOLETERIA' };
