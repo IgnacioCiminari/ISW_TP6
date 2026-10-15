@@ -23,11 +23,15 @@ export class PagosService {
       throw new Error('Forma de pago no soportada.');
     }
 
-    const preferencia = await this.pasarela.crearPreferencia(numeroOrden, total);
-    return {
-      formaPago: 'TARJETA',
-      estado: 'REDIRIGIDO_A_MERCADO_PAGO',
-      urlRedireccion: preferencia.urlRedireccion,
-    };
+    try {
+      const preferencia = await this.pasarela.crearPreferencia(numeroOrden, total);
+      return {
+        formaPago: 'TARJETA',
+        estado: 'REDIRIGIDO_A_MERCADO_PAGO',
+        urlRedireccion: preferencia.urlRedireccion,
+      };
+    } catch {
+      throw new Error('No se pudo iniciar el pago con Mercado Pago.');
+    }
   }
 }
