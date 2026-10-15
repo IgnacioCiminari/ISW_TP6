@@ -1,8 +1,8 @@
 
 export class ParqueService {
+    private static readonly LUNES = 1;
+    
     estaAbierto(fecha: Date): boolean {
-        const dia = fecha.getDay(); // 0=dom, 1=lun, ..., 6=sáb
-        if (dia === 1) return false; // lunes cerrado
-        return true;
+        return fecha.getDay() !== ParqueService.LUNES;
     }
 }
