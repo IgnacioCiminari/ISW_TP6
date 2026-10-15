@@ -41,6 +41,26 @@ describe('PagosService', () => {
         'El tipo de pase debe ser VIP o REGULAR.',
       );
     });
+  });
 
+  describe('calcularDetalle', () => {
+    const pagos = new PagosService(crearPasarelaFalsa());
+
+    it('debe devolver el subtotal de cada visitante y el total de la compra', () => {
+      const detalle = pagos.calcularDetalle([
+        { edad: 40, tipoPase: 'VIP' },
+        { edad: 10, tipoPase: 'REGULAR' },
+        { edad: 2, tipoPase: 'VIP' },
+      ]);
+
+      expect(detalle).toEqual({
+        subtotales: [
+          { edad: 40, tipoPase: 'VIP', precio: 20000 },
+          { edad: 10, tipoPase: 'REGULAR', precio: 5000 },
+          { edad: 2, tipoPase: 'VIP', precio: 0 },
+        ],
+        total: 25000,
+      });
+    });
   });
 });

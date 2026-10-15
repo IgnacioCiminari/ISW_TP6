@@ -1,4 +1,4 @@
-import type { PasarelaPago, TipoPase } from './pagos.types';
+import type { DetallePrecio, PasarelaPago, TipoPase, Visitante } from './pagos.types';
 import {
     PRECIO_ENTRADA_POR_PASE,
     PRECIO_ENTRADA_GRATIS,
@@ -34,5 +34,9 @@ export class PagosService {
         }
 
         return precioBase
+    }
+
+    calcularDetalle(visitantes: Visitante[]): DetallePrecio {
+        throw Error("No implementado")
     }
 }
