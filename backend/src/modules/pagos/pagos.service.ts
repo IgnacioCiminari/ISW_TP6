@@ -16,13 +16,20 @@ export class PagosService {
     formaPago: FormaPago,
   ): Promise<ResultadoPago> {
     if (formaPago === 'EFECTIVO') {
-      return { formaPago: 'EFECTIVO', estado: 'PENDIENTE_EN_BOLETERIA' };
+      return { formaPago, estado: 'PENDIENTE_EN_BOLETERIA' };
     }
 
-    if (formaPago !== 'TARJETA') {
-      throw new Error('Forma de pago no soportada.');
+    if (formaPago === 'TARJETA') {
+      return this.iniciarPagoConMercadoPago(numeroOrden, total);
     }
 
+    throw new Error('Forma de pago no soportada.');
+  }
+
+  private async iniciarPagoConMercadoPago(
+    numeroOrden: string,
+    total: number,
+  ): Promise<ResultadoPago> {
     try {
       const preferencia = await this.pasarela.crearPreferencia(numeroOrden, total);
       return {
