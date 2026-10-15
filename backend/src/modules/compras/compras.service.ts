@@ -1,10 +1,8 @@
 import type { FormaPago, ResultadoPago } from '../pagos/pagos.types';
 import type { DependenciasCompras, ResultadoCompra, SolicitudCompra } from './compras.types';
 
-// Valores provisorios: los próximos tests los reemplazan por los que dan los colaboradores.
-const NUMERO_ORDEN = 'ORD-0001';
+// Valor provisorio: el próximo test que cambie la cantidad lo reemplaza por la de la solicitud.
 const CANTIDAD_ENTRADAS = 2;
-const TOTAL = 25000;
 
 export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
@@ -12,14 +10,20 @@ export class ComprasService {
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
     const { email, fechaVisita, visitantes, formaPago } = solicitud;
     const detalle = this.deps.pagos.calcularDetalle(visitantes);
-    await this.deps.compras.guardar({ email, fechaVisita, visitantes, formaPago, detalle });
-    const pago = await this.iniciarPago(NUMERO_ORDEN, TOTAL, formaPago);
+    const numeroOrden = await this.deps.compras.guardar({
+      email,
+      fechaVisita,
+      visitantes,
+      formaPago,
+      detalle,
+    });
+    const pago = await this.iniciarPago(numeroOrden, detalle.total, formaPago);
 
     return {
-      numeroOrden: NUMERO_ORDEN,
+      numeroOrden,
       cantidadEntradas: CANTIDAD_ENTRADAS,
       fechaVisita,
-      total: TOTAL,
+      total: detalle.total,
       pago,
     };
   }
