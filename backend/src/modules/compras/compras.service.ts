@@ -1,5 +1,10 @@
 import type { FormaPago, ResultadoPago } from '../pagos/pagos.types';
-import type { DependenciasCompras, ResultadoCompra, SolicitudCompra } from './compras.types';
+import type {
+  DependenciasCompras,
+  ResultadoCompra,
+  ResumenCompra,
+  SolicitudCompra,
+} from './compras.types';
 
 // Valor provisorio: el próximo test que cambie la cantidad lo reemplaza por la de la solicitud.
 const CANTIDAD_ENTRADAS = 2;
@@ -18,7 +23,7 @@ export class ComprasService {
       detalle,
     });
     const pago = await this.iniciarPago(numeroOrden, detalle.total, formaPago);
-    await this.deps.notificador.enviarConfirmacion(email, {
+    await this.notificarCompra(email, {
       numeroOrden,
       fechaVisita,
       cantidadEntradas: CANTIDAD_ENTRADAS,
@@ -41,5 +46,9 @@ export class ComprasService {
     formaPago: FormaPago,
   ): Promise<ResultadoPago> {
     return this.deps.pagos.procesarPago(numeroOrden, total, formaPago);
+  }
+
+  private notificarCompra(email: string, resumen: ResumenCompra): Promise<void> {
+    return this.deps.notificador.enviarConfirmacion(email, resumen);
   }
 }
