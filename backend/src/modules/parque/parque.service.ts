@@ -17,6 +17,6 @@ export class ParqueService {
     }
 
     validarFechaVisita(fechaVisita: Date, ahora: Date = new Date()): void {
-        
+        // Cuerpo vacio
     } 
 }
