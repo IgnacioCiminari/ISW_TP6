@@ -5,13 +5,12 @@ import type { DependenciasCompras, ResultadoCompra, SolicitudCompra } from './co
 const NUMERO_ORDEN = 'ORD-0001';
 const CANTIDAD_ENTRADAS = 2;
 const TOTAL = 25000;
-const FORMA_PAGO: FormaPago = 'TARJETA';
 
 export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
 
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
-    const pago = await this.iniciarPago(NUMERO_ORDEN, TOTAL, FORMA_PAGO);
+    const pago = await this.iniciarPago(NUMERO_ORDEN, TOTAL, solicitud.formaPago);
 
     return {
       numeroOrden: NUMERO_ORDEN,
