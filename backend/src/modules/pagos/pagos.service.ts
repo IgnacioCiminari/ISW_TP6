@@ -9,6 +9,10 @@ export class PagosService {
             return 0
         }
 
+        if (edad === 3) {
+            return 0
+        }
+
         if (15 < edad && edad < 60) {
             if (tipoPase === 'VIP') {
                 return 20000
