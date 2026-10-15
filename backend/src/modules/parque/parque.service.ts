@@ -16,9 +16,13 @@ export class ParqueService {
         return !esLunes && !this.esFeriado(fecha);
     }
 
+    private soloFecha(d: Date): Date {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+
     validarFechaVisita(fechaVisita: Date, ahora: Date = new Date()): void {
-        const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
-        const visita = new Date(fechaVisita.getFullYear(), fechaVisita.getMonth(), fechaVisita.getDate());
+        const hoy = this.soloFecha(ahora);
+        const visita = this.soloFecha(fechaVisita);
         if (visita < hoy) {
             throw new Error('La fecha de visita no puede ser anterior al día actual.');
         }
