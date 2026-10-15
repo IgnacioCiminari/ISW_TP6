@@ -14,7 +14,7 @@ export class ComprasService {
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
     this.validarSolicitud(solicitud);
 
-    const { email, fechaVisita, visitantes, formaPago } = solicitud;
+    const { email, fechaVisita, cantidad, visitantes, formaPago } = solicitud;
     const detalle = this.deps.pagos.calcularDetalle(visitantes);
     const numeroOrden = await this.deps.compras.guardar({
       email,
@@ -27,7 +27,7 @@ export class ComprasService {
     await this.notificarCompra(email, {
       numeroOrden,
       fechaVisita,
-      cantidadEntradas: solicitud.cantidad,
+      cantidadEntradas: cantidad,
       formaPago,
       detalle,
       codigoQR: this.generarCodigoQR(numeroOrden),
@@ -35,7 +35,7 @@ export class ComprasService {
 
     return {
       numeroOrden,
-      cantidadEntradas: solicitud.cantidad,
+      cantidadEntradas: cantidad,
       fechaVisita,
       total: detalle.total,
       pago,
