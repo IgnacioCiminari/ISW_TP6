@@ -17,6 +17,7 @@ describe('PagosService', () => {
 
     it.each<[number, TipoPase, number]>([
       [30, 'VIP', 20000],
+      [30, 'REGULAR', 10000],
     ])('un visitante de %i años con pase %s paga $%i', (edad, tipoPase, precioEsperado) => {
       expect(pagos.calcularPrecioEntrada(edad, tipoPase)).toBe(precioEsperado);
     });
