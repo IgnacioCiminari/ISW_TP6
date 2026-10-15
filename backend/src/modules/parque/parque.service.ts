@@ -17,6 +17,10 @@ export class ParqueService {
     }
 
     validarFechaVisita(fechaVisita: Date, ahora: Date = new Date()): void {
-        // Cuerpo vacio
-    } 
+        const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+        const visita = new Date(fechaVisita.getFullYear(), fechaVisita.getMonth(), fechaVisita.getDate());
+        if (visita < hoy) {
+            throw new Error('La fecha de visita no puede ser anterior al día actual.');
+        }
+    }
 }
