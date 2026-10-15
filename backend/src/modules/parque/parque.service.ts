@@ -26,5 +26,8 @@ export class ParqueService {
         if (visita < hoy) {
             throw new Error('La fecha de visita no puede ser anterior al día actual.');
         }
+        if (!this.estaAbierto(fechaVisita)) {
+            throw new Error('El parque está cerrado en la fecha seleccionada.');
+        }
     }
 }
