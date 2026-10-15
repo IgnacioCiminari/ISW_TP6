@@ -58,5 +58,11 @@ describe('ParqueService', () => {
         );
     });
 
+    it('rechaza el día actual si se compra después de las 17:30', () => {
+        expect(() =>
+            parque.validarFechaVisita(fecha(2026, 10, 14), fecha(2026, 10, 14, 17, 31)),
+        ).toThrow('Las entradas para el día actual solo pueden comprarse hasta las 17:30.');
+    });
+
   });
 });
