@@ -10,7 +10,10 @@ describe('ParqueService', () => {
 
   describe('estaAbierto', () => {
     it.each([
-      ['martes', fecha(2026, 10, 20)]
+      ['martes', fecha(2026, 10, 20)],
+      ['miércoles', fecha(2026, 10, 14)],
+      ['sábado', fecha(2026, 10, 17)],
+      ['domingo', fecha(2026, 10, 18)],
     ])('está abierto un %s', (_dia, dia) => {
       expect(parque.estaAbierto(dia)).toBe(true);
     });
