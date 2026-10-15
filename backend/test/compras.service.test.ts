@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ComprasService } from '../src/modules/compras/compras.service';
-import type { NuevaCompra, SolicitudCompra } from '../src/modules/compras/compras.types';
+import type { NuevaCompra, ResumenCompra, SolicitudCompra } from '../src/modules/compras/compras.types';
 import type { DetallePrecio, ResultadoPago, Visitante } from '../src/modules/pagos/pagos.types';
 
 // Tests unitarios: parque, pagos, repositorios y mail son fakes,
@@ -45,6 +45,11 @@ const crearDependencias = () => ({
   },
   compras: {
     guardar: vi.fn<(compra: NuevaCompra) => Promise<string>>().mockResolvedValue('ORD-0001'),
+  },
+  notificador: {
+    enviarConfirmacion: vi
+      .fn<(email: string, resumen: ResumenCompra) => Promise<void>>()
+      .mockResolvedValue(undefined),
   },
 });
 
@@ -99,6 +104,24 @@ describe('ComprasService.comprarEntradas', () => {
         formaPago: 'TARJETA',
         detalle: DETALLE,
       });
+    });
+
+    it('envía el mail de confirmación con el resumen de la compra', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
+
+      await servicio.comprarEntradas(solicitudValida());
+
+      expect(deps.notificador.enviarConfirmacion).toHaveBeenCalledWith(
+        EMAIL,
+        expect.objectContaining({
+          numeroOrden: 'ORD-0001',
+          fechaVisita: FECHA_VISITA,
+          cantidadEntradas: 2,
+          formaPago: 'TARJETA',
+          detalle: DETALLE,
+        }),
+      );
     });
   });
 });

@@ -16,6 +16,14 @@ export interface NuevaCompra {
   detalle: DetallePrecio;
 }
 
+export interface ResumenCompra {
+  numeroOrden: string;
+  fechaVisita: Date;
+  cantidadEntradas: number;
+  formaPago: FormaPago;
+  detalle: DetallePrecio;
+}
+
 export interface ResultadoCompra {
   numeroOrden: string;
   cantidadEntradas: number;
@@ -32,5 +40,8 @@ export interface DependenciasCompras {
   };
   compras: {
     guardar(compra: NuevaCompra): Promise<string>;
+  };
+  notificador: {
+    enviarConfirmacion(email: string, resumen: ResumenCompra): Promise<void>;
   };
 }
