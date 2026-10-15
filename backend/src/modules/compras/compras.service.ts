@@ -29,6 +29,7 @@ export class ComprasService {
       cantidadEntradas: CANTIDAD_ENTRADAS,
       formaPago,
       detalle,
+      codigoQR: `QR-${numeroOrden}`,
     });
 
     return {
