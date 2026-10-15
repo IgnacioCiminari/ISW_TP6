@@ -10,7 +10,9 @@ export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
 
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
-    const { fechaVisita, formaPago } = solicitud;
+    const { email, fechaVisita, visitantes, formaPago } = solicitud;
+    const detalle = this.deps.pagos.calcularDetalle(visitantes);
+    await this.deps.compras.guardar({ email, fechaVisita, visitantes, formaPago, detalle });
     const pago = await this.iniciarPago(NUMERO_ORDEN, TOTAL, formaPago);
 
     return {
