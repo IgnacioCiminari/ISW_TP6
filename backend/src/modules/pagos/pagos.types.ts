@@ -6,3 +6,9 @@ export interface Visitante {
   edad: number;
   tipoPase: TipoPase;
 }
+
+export interface ResultadoPago {
+  formaPago: FormaPago;
+  estado: 'REDIRIGIDO_A_MERCADO_PAGO';
+  urlRedireccion: string;
+}
