@@ -22,6 +22,7 @@ export interface ResumenCompra {
   cantidadEntradas: number;
   formaPago: FormaPago;
   detalle: DetallePrecio;
+  codigoQR: string;
 }
 
 export interface ResultadoCompra {

@@ -123,5 +123,17 @@ describe('ComprasService.comprarEntradas', () => {
         }),
       );
     });
+
+    it('el mail de confirmación incluye un código QR de acceso', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
+
+      await servicio.comprarEntradas(solicitudValida());
+
+      expect(deps.notificador.enviarConfirmacion).toHaveBeenCalledOnce();
+      const [, resumen] = deps.notificador.enviarConfirmacion.mock.calls[0]!;
+      expect(resumen.codigoQR).toEqual(expect.any(String));
+      expect(resumen.codigoQR.length).toBeGreaterThan(0);
+    });
   });
 });
