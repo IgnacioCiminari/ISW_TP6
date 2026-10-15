@@ -4,6 +4,14 @@ export class PagosService {
     constructor(private readonly pasarela: PasarelaPago) {}
 
     calcularPrecioEntrada(edad: number, tipoPase: TipoPase): number {
-        throw new Error("No implementado")
+        if (15 < edad && edad < 60) {
+            if (tipoPase === 'VIP') {
+                return 20000
+            } else {
+                throw Error("No implementado")
+            }
+        } else {
+            throw Error("No implementado")
+        }
     }
 }
