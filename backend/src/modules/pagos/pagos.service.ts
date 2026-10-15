@@ -8,7 +8,7 @@ export class PagosService {
             if (tipoPase === 'VIP') {
                 return 20000
             } else {
-                throw Error("No implementado")
+                return 10000
             }
         } else {
             throw Error("No implementado")
