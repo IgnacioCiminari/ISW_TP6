@@ -19,6 +19,10 @@ export class PagosService {
       return { formaPago: 'EFECTIVO', estado: 'PENDIENTE_EN_BOLETERIA' };
     }
 
+    if (formaPago !== 'TARJETA') {
+      throw new Error('Forma de pago no soportada.');
+    }
+
     const preferencia = await this.pasarela.crearPreferencia(numeroOrden, total);
     return {
       formaPago: 'TARJETA',
