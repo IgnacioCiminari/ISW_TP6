@@ -46,5 +46,11 @@ describe('ParqueService', () => {
         );
     });
 
+    it('rechaza un lunes porque el parque está cerrado', () => {
+        expect(() => parque.validarFechaVisita(fecha(2026, 10, 19), ahora)).toThrow(
+            'El parque está cerrado en la fecha seleccionada.',
+        );
+    });
+
   });
 });
