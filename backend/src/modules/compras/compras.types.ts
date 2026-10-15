@@ -43,6 +43,7 @@ export interface DependenciasCompras {
     procesarPago(numeroOrden: string, total: number, formaPago: FormaPago): Promise<ResultadoPago>;
   };
   compras: {
+    contarEntradas(email: string, fecha: Date): Promise<number>;
     guardar(compra: NuevaCompra): Promise<string>;
   };
   notificador: {

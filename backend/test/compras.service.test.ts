@@ -48,6 +48,7 @@ const crearDependencias = () => ({
     procesarPago: vi.fn<() => Promise<ResultadoPago>>().mockResolvedValue(PAGO_TARJETA),
   },
   compras: {
+    contarEntradas: vi.fn<(email: string, fecha: Date) => Promise<number>>().mockResolvedValue(0),
     guardar: vi.fn<(compra: NuevaCompra) => Promise<string>>().mockResolvedValue('ORD-0001'),
   },
   notificador: {
@@ -155,6 +156,16 @@ describe('ComprasService.comprarEntradas', () => {
       await expect(
         servicio.comprarEntradas(solicitudValida({ cantidad: 10, visitantes: visitantes(10) })),
       ).resolves.toMatchObject({ cantidadEntradas: 10 });
+    });
+
+    it('permite completar 10 entradas para una fecha sumando compras anteriores', async () => {
+      const deps = crearDependencias();
+      deps.compras.contarEntradas.mockResolvedValue(8);
+      const servicio = new ComprasService(deps);
+
+      await expect(servicio.comprarEntradas(solicitudValida())).resolves.toMatchObject({
+        cantidadEntradas: 2,
+      });
     });
   });
 });
