@@ -6,6 +6,8 @@ import type {
   SolicitudCompra,
 } from './compras.types';
 
+const PREFIJO_QR = 'QR-';
+
 // Valor provisorio: el próximo test que cambie la cantidad lo reemplaza por la de la solicitud.
 const CANTIDAD_ENTRADAS = 2;
 
@@ -29,7 +31,7 @@ export class ComprasService {
       cantidadEntradas: CANTIDAD_ENTRADAS,
       formaPago,
       detalle,
-      codigoQR: `QR-${numeroOrden}`,
+      codigoQR: this.generarCodigoQR(numeroOrden),
     });
 
     return {
@@ -51,5 +53,9 @@ export class ComprasService {
 
   private notificarCompra(email: string, resumen: ResumenCompra): Promise<void> {
     return this.deps.notificador.enviarConfirmacion(email, resumen);
+  }
+
+  private generarCodigoQR(numeroOrden: string): string {
+    return `${PREFIJO_QR}${numeroOrden}`;
   }
 }
