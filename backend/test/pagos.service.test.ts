@@ -46,6 +46,14 @@ describe('PagosService', () => {
       );
     });
 
-    
+    it('informa un error claro si Mercado Pago no responde', async () => {
+      const pasarela = crearPasarelaFalsa();
+      pasarela.crearPreferencia.mockRejectedValue(new Error('timeout'));
+      const pagos = new PagosService(pasarela);
+
+      await expect(pagos.procesarPago('ORD-0001', 25000, 'TARJETA')).rejects.toThrow(
+        'No se pudo iniciar el pago con Mercado Pago.',
+      );
+    });
   });
 });
