@@ -12,6 +12,11 @@ export class PagosService {
     constructor(private readonly pasarela: PasarelaPago) {}
 
     calcularPrecioEntrada(edad: number, tipoPase: TipoPase): number {
+
+        if (!Object.hasOwn(PRECIO_ENTRADA_POR_PASE, tipoPase)) {
+            throw Error('El tipo de pase debe ser VIP o REGULAR.')
+        }
+
         const precioBase = PRECIO_ENTRADA_POR_PASE[tipoPase]
 
         if (edad < 0) {
