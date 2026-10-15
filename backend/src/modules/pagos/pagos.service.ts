@@ -24,7 +24,11 @@ export class PagosService {
                 return 10000
             }
         } else {
-            throw Error("No implementado")
+            if (tipoPase === 'VIP') {
+                return 10000
+            } else {
+                throw Error("No implementado")
+            }
         }
     }
 }
