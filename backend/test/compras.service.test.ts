@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ComprasService } from '../src/modules/compras/compras.service';
-import type { DependenciasCompras, SolicitudCompra } from '../src/modules/compras/compras.types';
+import type { SolicitudCompra } from '../src/modules/compras/compras.types';
 import type { ResultadoPago } from '../src/modules/pagos/pagos.types';
 
 // Tests unitarios: parque, pagos, repositorios y mail son fakes,
