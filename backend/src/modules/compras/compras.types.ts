@@ -8,5 +8,12 @@ export interface SolicitudCompra {
   formaPago: FormaPago;
 }
 
+export interface ResultadoCompra {
+  numeroOrden: string;
+  cantidadEntradas: number;
+  fechaVisita: Date;
+  total: number;
+}
+
 // Colaboradores inyectados por constructor. Se agregan a medida que los tests los piden.
 export interface DependenciasCompras {}
