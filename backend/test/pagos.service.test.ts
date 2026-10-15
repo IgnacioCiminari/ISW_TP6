@@ -23,5 +23,19 @@ describe('PagosService', () => {
       expect(resultado).toEqual({ formaPago: 'EFECTIVO', estado: 'PENDIENTE_EN_BOLETERIA' });
       expect(pasarela.crearPreferencia).not.toHaveBeenCalled();
     });
+
+    it('con tarjeta crea la preferencia en Mercado Pago y devuelve la URL de redirección', async () => {
+      const pasarela = crearPasarelaFalsa();
+      const pagos = new PagosService(pasarela);
+
+      const resultado = await pagos.procesarPago('ORD-0001', 25000, 'TARJETA');
+
+      expect(pasarela.crearPreferencia).toHaveBeenCalledWith('ORD-0001', 25000);
+      expect(resultado).toEqual({
+        formaPago: 'TARJETA',
+        estado: 'REDIRIGIDO_A_MERCADO_PAGO',
+        urlRedireccion: URL_MP,
+      });
+    });
   });
 });
