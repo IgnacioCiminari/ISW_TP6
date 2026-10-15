@@ -14,5 +14,9 @@ describe('ParqueService', () => {
     ])('está abierto un %s', (_dia, dia) => {
       expect(parque.estaAbierto(dia)).toBe(true);
     });
+
+    it('está cerrado los lunes', () => {
+      expect(parque.estaAbierto(fecha(2026, 10, 19))).toBe(false);
+    });
   });
 });
