@@ -226,7 +226,14 @@ describe('validaciones', () => {
     ).rejects.toThrow('No se pueden comprar más de 10 entradas.');
     expect(deps.compras.guardar).not.toHaveBeenCalled();
  });
+ 
+  it('rechaza la compra de 0 entradas', async () => {
+    const servicio = new ComprasService(crearDependencias());
 
+    await expect(
+      servicio.comprarEntradas(solicitudValida({ cantidad: 0, visitantes: [] })),
+    ).rejects.toThrow('Debe comprar al menos una entrada.');
+  });
   
 
 })
