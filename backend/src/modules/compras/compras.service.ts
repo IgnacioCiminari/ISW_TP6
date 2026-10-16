@@ -48,7 +48,7 @@ export class ComprasService {
     this.deps.parque.validarFechaVisita(solicitud.fechaVisita);
     await this.validarUsuarioRegistrado(solicitud.email);
     this.validarSeleccionPago(solicitud.formaPago);
-    this.validarCantidadEntradas(solicitud.cantidad);
+    await this.validarCantidadEntradas(solicitud);
 
   }
 
@@ -65,12 +65,17 @@ export class ComprasService {
     }
   }
 
-  private validarCantidadEntradas(cantidad: number): void { 
-    if (cantidad > MAX_ENTRADAS) {
+  private async validarCantidadEntradas(solicitud: SolicitudCompra): Promise<void> { 
+    if (solicitud.cantidad > MAX_ENTRADAS) {
       throw new Error('No se pueden comprar más de 10 entradas.')
     }
-    if (cantidad === 0){
+    if (solicitud.cantidad === 0){
       throw new Error('Debe comprar al menos una entrada.');
+    }
+
+    const comprasAnteriores = await this.deps.compras.contarEntradas(solicitud.email,solicitud.fechaVisita);
+    if (( comprasAnteriores + solicitud.cantidad) > MAX_ENTRADAS) {
+      throw new Error('Supera el máximo de 10 entradas para la fecha seleccionada.');
     }
   }
 
