@@ -13,8 +13,7 @@ export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
 
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
-    this.validarSolicitud(solicitud);
-    await this.validarUsuarioRegistrado(solicitud.email);
+    await this.validarSolicitud(solicitud);
 
     const { email, fechaVisita, cantidad, visitantes, formaPago } = solicitud;
     const detalle = this.deps.pagos.calcularDetalle(visitantes);
@@ -44,10 +43,18 @@ export class ComprasService {
     };
   }
 
-  private validarSolicitud(solicitud: SolicitudCompra): void {
+  private async validarSolicitud(solicitud: SolicitudCompra): Promise<void> {
     this.deps.parque.validarFechaVisita(solicitud.fechaVisita);
+    await this.validarUsuarioRegistrado(solicitud.email);
   }
 
+  private async validarUsuarioRegistrado(email: string): Promise<void> {
+    const registrado = await this.deps.usuarios.estaRegistrado(email);
+    if (!registrado) {
+    throw new Error('Solo los usuarios registrados pueden comprar entradas.');
+    }
+  }
+  
   private registrarCompra(compra: NuevaCompra): Promise<string> {
     return this.deps.compras.guardar(compra);
   }
@@ -67,11 +74,6 @@ export class ComprasService {
   private generarCodigoQR(numeroOrden: string): string {
     return `${PREFIJO_QR}${numeroOrden}`;
   }
+ 
+}
 
-  private async validarUsuarioRegistrado(email: string): Promise<void> {
-    const registrado = await this.deps.usuarios.estaRegistrado(email);
-    if (!registrado) {
-    throw new Error('Solo los usuarios registrados pueden comprar entradas.');
-  }
-}
-}
