@@ -46,6 +46,8 @@ export class ComprasService {
   private async validarSolicitud(solicitud: SolicitudCompra): Promise<void> {
     this.deps.parque.validarFechaVisita(solicitud.fechaVisita);
     await this.validarUsuarioRegistrado(solicitud.email);
+    this.validarSeleccionPago(solicitud.formaPago);
+
   }
 
   private async validarUsuarioRegistrado(email: string): Promise<void> {
@@ -54,7 +56,13 @@ export class ComprasService {
     throw new Error('Solo los usuarios registrados pueden comprar entradas.');
     }
   }
-  
+
+  private validarSeleccionPago(formaPago: FormaPago): Promise<void>{
+    if (!formaPago) {
+      throw new Error('Debe seleccionar una forma de pago.');
+    }
+  }
+
   private registrarCompra(compra: NuevaCompra): Promise<string> {
     return this.deps.compras.guardar(compra);
   }
