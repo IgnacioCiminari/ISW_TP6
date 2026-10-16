@@ -189,4 +189,15 @@ describe('validaciones', () => {
       );
       expect(deps.compras.guardar).not.toHaveBeenCalled();
     });
+
+   it('rechaza la compra sin forma de pago seleccionada', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
+
+      await expect(
+        servicio.comprarEntradas(solicitudValida({ formaPago: undefined })),
+      ).rejects.toThrow('Debe seleccionar una forma de pago.');
+      expect(deps.compras.guardar).not.toHaveBeenCalled();
+      expect(deps.pagos.procesarPago).not.toHaveBeenCalled();
+    });
 })
