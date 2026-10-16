@@ -86,6 +86,8 @@ export class ComprasService {
     }
     for (const visitante of visitantes) {
       if (
+        visitante.edad < 0 ||
+        !Number.isFinite(visitante.edad) ||
         visitante.edad === undefined ||
         visitante.tipoPase === undefined
       ) {
