@@ -35,6 +35,9 @@ export interface ResultadoCompra {
 
 // Colaboradores inyectados por constructor. Se agregan a medida que los tests los piden.
 export interface DependenciasCompras {
+  usuarios: {
+    estaRegistrado(email: string): Promise<boolean>;
+  };
   parque: {
     validarFechaVisita(fechaVisita: Date, ahora?: Date): void;
   };
