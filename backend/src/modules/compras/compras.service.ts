@@ -47,6 +47,7 @@ export class ComprasService {
     this.deps.parque.validarFechaVisita(solicitud.fechaVisita);
     await this.validarUsuarioRegistrado(solicitud.email);
     this.validarSeleccionPago(solicitud.formaPago);
+    this.validarCantidadEntradas(solicitud.cantidad);
 
   }
 
@@ -60,6 +61,12 @@ export class ComprasService {
   private validarSeleccionPago(formaPago: FormaPago): void {
     if (formaPago === undefined) {
       throw new Error('Debe seleccionar una forma de pago.');
+    }
+  }
+
+  private validarCantidadEntradas(cantidad: number): void { 
+    if (cantidad > 10) {
+      throw new Error('No se pueden comprar más de 10 entradas.')
     }
   }
 
