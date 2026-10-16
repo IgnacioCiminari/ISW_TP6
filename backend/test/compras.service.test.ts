@@ -234,6 +234,17 @@ describe('validaciones', () => {
       servicio.comprarEntradas(solicitudValida({ cantidad: 0, visitantes: [] })),
     ).rejects.toThrow('Debe comprar al menos una entrada.');
   });
-  
 
+  it('rechaza la compra si con compras anteriores se superan 10 entradas para esa fecha', async () => {
+      const deps = crearDependencias();
+      deps.compras.contarEntradas.mockResolvedValue(9);
+      const servicio = new ComprasService(deps);
+
+      await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
+        'Supera el máximo de 10 entradas para la fecha seleccionada.',
+      );
+      expect(deps.compras.contarEntradas).toHaveBeenCalledWith(EMAIL, FECHA_VISITA);
+      expect(deps.compras.guardar).not.toHaveBeenCalled();
+    });
+  
 })
