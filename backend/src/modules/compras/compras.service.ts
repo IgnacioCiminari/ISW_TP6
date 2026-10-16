@@ -25,7 +25,8 @@ export class ComprasService {
       formaPago,
       detalle,
     });
-    const pago = await this.iniciarPago(numeroOrden, detalle.total, formaPago);
+      const pago = await this.iniciarPago(numeroOrden, detalle.total, formaPago);
+      
     await this.notificarCompra(email, {
       numeroOrden,
       fechaVisita,
@@ -50,7 +51,6 @@ export class ComprasService {
     this.validarSeleccionPago(solicitud.formaPago);
     await this.validarCantidadEntradas(solicitud);
     this.validarVisitantes(solicitud.cantidad, solicitud.visitantes);
-
   }
 
   private async validarUsuarioRegistrado(email: string): Promise<void> {
@@ -100,12 +100,18 @@ export class ComprasService {
     return this.deps.compras.guardar(compra);
   }
 
-  private iniciarPago(
+  private async iniciarPago(
     numeroOrden: string,
     total: number,
     formaPago: FormaPago,
   ): Promise<ResultadoPago> {
-    return this.deps.pagos.procesarPago(numeroOrden, total, formaPago);
+    try {
+    return await this.deps.pagos.procesarPago(numeroOrden, total, formaPago);
+    } 
+    catch(error){
+      throw new Error('No se pudo iniciar el pago con Mercado Pago.');
+    };
+    
   }
 
   private notificarCompra(email: string, resumen: ResumenCompra): Promise<void> {

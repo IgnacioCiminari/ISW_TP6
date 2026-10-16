@@ -257,6 +257,9 @@ describe('validaciones', () => {
   
   it('no envía el mail de confirmación si el pago no se pudo iniciar', async () => {
     const deps = crearDependencias();
+    deps.pagos.procesarPago.mockRejectedValue(
+        new Error('No se pudo iniciar el pago con Mercado Pago.'),
+      );
     const servicio = new ComprasService(deps);
 
     await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
