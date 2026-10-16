@@ -1,4 +1,4 @@
-import type { FormaPago, ResultadoPago } from '../pagos/pagos.types';
+import type { FormaPago, ResultadoPago, Visitante } from '../pagos/pagos.types';
 import type {
   DependenciasCompras,
   NuevaCompra,
@@ -49,6 +49,7 @@ export class ComprasService {
     await this.validarUsuarioRegistrado(solicitud.email);
     this.validarSeleccionPago(solicitud.formaPago);
     await this.validarCantidadEntradas(solicitud);
+    this.validarVisitantes(solicitud.cantidad, solicitud.visitantes);
 
   }
 
@@ -76,6 +77,20 @@ export class ComprasService {
     const comprasAnteriores = await this.deps.compras.contarEntradas(solicitud.email,solicitud.fechaVisita);
     if (( comprasAnteriores + solicitud.cantidad) > MAX_ENTRADAS) {
       throw new Error('Supera el máximo de 10 entradas para la fecha seleccionada.');
+    }
+  }
+
+  private validarVisitantes(cantidad: number, visitantes: Visitante[]): void {
+    if (visitantes.length !== cantidad) {
+      throw new Error('Debe indicar la edad y el tipo de pase de cada visitante.');
+    }
+    for (const visitante of visitantes) {
+      if (
+        visitante.edad === undefined ||
+        visitante.tipoPase === undefined
+      ) {
+        throw new Error('Debe indicar la edad y el tipo de pase de cada visitante.');
+      }
     }
   }
 
