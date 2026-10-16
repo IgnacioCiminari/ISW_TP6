@@ -203,9 +203,15 @@ describe('validaciones', () => {
     
   it('rechaza la compra si el parque está cerrado en la fecha elegida', async () => {
     const deps = crearDependencias();
+    const fechaLunes = new Date(2026, 9, 26); // lunes 26/10/2026
     const servicio = new ComprasService(deps);
-
-   await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
+    
+    deps.parque.validarFechaVisita.mockImplementation((fecha) => {
+      if (fecha.getDay() === 1) {
+        throw new Error('El parque está cerrado en la fecha seleccionada.');
+      }
+    });
+     await expect(servicio.comprarEntradas(solicitudValida({fechaVisita: fechaLunes}))).rejects.toThrow(
       'El parque está cerrado en la fecha seleccionada.',
     );
     expect(deps.compras.guardar).not.toHaveBeenCalled();
