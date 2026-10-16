@@ -180,24 +180,35 @@ describe('ComprasService.comprarEntradas', () => {
 
 describe('validaciones', () => {
   it('rechaza la compra de un usuario no registrado', async () => {
-      const deps = crearDependencias();
-      deps.usuarios.estaRegistrado.mockResolvedValue(false);
-      const servicio = new ComprasService(deps);
+    const deps = crearDependencias();
+    deps.usuarios.estaRegistrado.mockResolvedValue(false);
+    const servicio = new ComprasService(deps);
 
-      await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
-        'Solo los usuarios registrados pueden comprar entradas.',
-      );
-      expect(deps.compras.guardar).not.toHaveBeenCalled();
-    });
+    await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
+      'Solo los usuarios registrados pueden comprar entradas.',
+    );
+    expect(deps.compras.guardar).not.toHaveBeenCalled();
+  });
 
-   it('rechaza la compra sin forma de pago seleccionada', async () => {
-      const deps = crearDependencias();
-      const servicio = new ComprasService(deps);
+  it('rechaza la compra sin forma de pago seleccionada', async () => {
+    const deps = crearDependencias();
+    const servicio = new ComprasService(deps);
 
-      await expect(
-        servicio.comprarEntradas(solicitudValida({ formaPago: undefined })),
-      ).rejects.toThrow('Debe seleccionar una forma de pago.');
-      expect(deps.compras.guardar).not.toHaveBeenCalled();
-      expect(deps.pagos.procesarPago).not.toHaveBeenCalled();
-    });
+    await expect(
+      servicio.comprarEntradas(solicitudValida({ formaPago: undefined })),
+    ).rejects.toThrow('Debe seleccionar una forma de pago.');
+    expect(deps.compras.guardar).not.toHaveBeenCalled();
+    expect(deps.pagos.procesarPago).not.toHaveBeenCalled();
+  });
+    
+  it('rechaza la compra si el parque está cerrado en la fecha elegida', async () => {
+    const deps = crearDependencias();
+    const servicio = new ComprasService(deps);
+
+   await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
+      'El parque está cerrado en la fecha seleccionada.',
+    );
+    expect(deps.compras.guardar).not.toHaveBeenCalled();
+  });
+    
 })
