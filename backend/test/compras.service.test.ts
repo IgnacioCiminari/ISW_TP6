@@ -22,6 +22,7 @@ const DETALLE: DetallePrecio = {
   total: 25000,
 };
 
+
 const PAGO_TARJETA: ResultadoPago = {
   formaPago: 'TARJETA',
   estado: 'REDIRIGIDO_A_MERCADO_PAGO',
@@ -59,6 +60,9 @@ const crearDependencias = () => ({
     enviarConfirmacion: vi
       .fn<(email: string, resumen: ResumenCompra) => Promise<void>>()
       .mockResolvedValue(undefined),
+  },
+  usuarios: {
+  estaRegistrado: vi.fn<(email: string) => Promise<boolean>>().mockResolvedValue(true),
   },
 });
 

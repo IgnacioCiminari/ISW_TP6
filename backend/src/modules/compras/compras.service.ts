@@ -14,6 +14,7 @@ export class ComprasService {
 
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
     this.validarSolicitud(solicitud);
+    await this.validarUsuarioRegistrado(solicitud.email);
 
     const { email, fechaVisita, cantidad, visitantes, formaPago } = solicitud;
     const detalle = this.deps.pagos.calcularDetalle(visitantes);
@@ -66,4 +67,11 @@ export class ComprasService {
   private generarCodigoQR(numeroOrden: string): string {
     return `${PREFIJO_QR}${numeroOrden}`;
   }
+
+  private async validarUsuarioRegistrado(email: string): Promise<void> {
+    const registrado = await this.deps.usuarios.estaRegistrado(email);
+    if (!registrado) {
+    throw new Error('Solo los usuarios registrados pueden comprar entradas.');
+  }
+}
 }
