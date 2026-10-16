@@ -220,7 +220,7 @@ describe('validaciones', () => {
   it('rechaza la compra de más de 10 entradas', async () => {
     const deps = crearDependencias();
     const servicio = new ComprasService(deps);
-    
+
     await expect(
       servicio.comprarEntradas(solicitudValida({ cantidad: 11, visitantes: visitantes(11) })),
     ).rejects.toThrow('No se pueden comprar más de 10 entradas.');

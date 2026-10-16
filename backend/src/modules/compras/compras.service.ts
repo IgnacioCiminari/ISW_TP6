@@ -8,6 +8,7 @@ import type {
 } from './compras.types';
 
 const PREFIJO_QR = 'QR-';
+const MAX_ENTRADAS = 10;
 
 export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
@@ -65,7 +66,7 @@ export class ComprasService {
   }
 
   private validarCantidadEntradas(cantidad: number): void { 
-    if (cantidad > 10) {
+    if (cantidad > MAX_ENTRADAS) {
       throw new Error('No se pueden comprar más de 10 entradas.')
     }
   }
