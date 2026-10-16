@@ -173,3 +173,16 @@ describe('ComprasService.comprarEntradas', () => {
     });
   });
 });
+
+describe('validaciones', () => {
+  it('rechaza la compra de un usuario no registrado', async () => {
+      const deps = crearDependencias();
+      deps.usuarios.estaRegistrado.mockResolvedValue(false);
+      const servicio = new ComprasService(deps);
+
+      await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
+        'Solo los usuarios registrados pueden comprar entradas.',
+      );
+      expect(deps.compras.guardar).not.toHaveBeenCalled();
+    });
+})
