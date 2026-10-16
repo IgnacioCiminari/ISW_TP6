@@ -57,8 +57,8 @@ export class ComprasService {
     }
   }
 
-  private validarSeleccionPago(formaPago: FormaPago): Promise<void>{
-    if (!formaPago) {
+  private validarSeleccionPago(formaPago: FormaPago): void {
+    if (formaPago === undefined) {
       throw new Error('Debe seleccionar una forma de pago.');
     }
   }
