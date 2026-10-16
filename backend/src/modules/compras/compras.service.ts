@@ -69,6 +69,9 @@ export class ComprasService {
     if (cantidad > MAX_ENTRADAS) {
       throw new Error('No se pueden comprar más de 10 entradas.')
     }
+    if (cantidad === 0){
+      throw new Error('Debe comprar al menos una entrada.');
+    }
   }
 
   private registrarCompra(compra: NuevaCompra): Promise<string> {
