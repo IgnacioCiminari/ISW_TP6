@@ -246,5 +246,13 @@ describe('validaciones', () => {
       expect(deps.compras.contarEntradas).toHaveBeenCalledWith(EMAIL, FECHA_VISITA);
       expect(deps.compras.guardar).not.toHaveBeenCalled();
     });
+
+  it('rechaza la compra si no se indican edad y pase de cada visitante', async () => {
+    const servicio = new ComprasService(crearDependencias());
+
+    await expect(
+      servicio.comprarEntradas(solicitudValida({ cantidad: 3, visitantes: visitantes(2) })),
+    ).rejects.toThrow('Debe indicar la edad y el tipo de pase de cada visitante.');
+  });
   
 })
