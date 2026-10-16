@@ -255,4 +255,14 @@ describe('validaciones', () => {
     ).rejects.toThrow('Debe indicar la edad y el tipo de pase de cada visitante.');
   });
   
+  it('no envía el mail de confirmación si el pago no se pudo iniciar', async () => {
+    const deps = crearDependencias();
+    const servicio = new ComprasService(deps);
+
+    await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
+      'No se pudo iniciar el pago con Mercado Pago.',
+    );
+    expect(deps.notificador.enviarConfirmacion).not.toHaveBeenCalled();
+  });
+  
 })
