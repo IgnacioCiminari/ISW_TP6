@@ -27,6 +27,9 @@ coverage/
 .env
 .env*.local
 
+# SQLite local data
+bd/data/*.sqlite
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
