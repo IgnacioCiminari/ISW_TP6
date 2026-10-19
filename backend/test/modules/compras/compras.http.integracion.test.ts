@@ -1,9 +1,32 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Server } from 'node:http';
 import { crearAplicacion } from '../../../src/aplicacion';
-import { NotificadorSimulado } from '../../../src/modules/compras/compras.notificador-simulado';
-import { PasarelaPagoSimulada } from '../../../src/modules/pagos/pagos.pasarela-simulada';
 import { crearServidor } from '../../../src/servidor-http';
+import { NotificadorFalso } from '../../fakes/notificador.falso';
+import { PasarelaPagoFalsa } from '../../fakes/pasarela-pago.falsa';
+
+const crearSistemaDePrueba = async () => {
+  const pasarela = new PasarelaPagoFalsa({
+    id: 'PREF-PRUEBA',
+    urlRedireccion: 'https://pago.simulado/checkout',
+  });
+  const notificador = new NotificadorFalso();
+  const aplicacion = crearAplicacion({ ruta: ':memory:', pasarela, notificador });
+  aplicacion.conexion.baseDatos
+    .prepare('INSERT INTO usuarios(email) VALUES (?)')
+    .run('visitante@mail.com');
+  const servidor = crearServidor(aplicacion.controlador);
+  await new Promise<void>((resolve) => servidor.listen(0, '127.0.0.1', resolve));
+  const direccion = servidor.address();
+  if (!direccion || typeof direccion === 'string') throw new Error('No se pudo obtener el puerto.');
+  return {
+    aplicacion,
+    servidor,
+    pasarela,
+    notificador,
+    url: `http://127.0.0.1:${direccion.port}/api/compras`,
+  };
+};
 
 describe('POST /api/compras integrado', () => {
   let servidor: Server | undefined;
@@ -19,21 +42,12 @@ describe('POST /api/compras integrado', () => {
   });
 
   it('persiste la compra y devuelve el pago con tarjeta simulado', async () => {
-    const aplicacion = crearAplicacion({
-      ruta: ':memory:',
-      pasarela: new PasarelaPagoSimulada('https://pago.simulado/checkout'),
-      notificador: new NotificadorSimulado(),
-    });
+    const sistema = await crearSistemaDePrueba();
+    const { aplicacion, pasarela, notificador } = sistema;
     cerrarBaseDatos = () => aplicacion.conexion.cerrar();
-    aplicacion.conexion.baseDatos
-      .prepare('INSERT INTO usuarios(email) VALUES (?)')
-      .run('visitante@mail.com');
-    servidor = crearServidor(aplicacion.controlador);
-    await new Promise<void>((resolve) => servidor?.listen(0, '127.0.0.1', resolve));
-    const direccion = servidor.address();
-    if (!direccion || typeof direccion === 'string') throw new Error('No se pudo obtener el puerto.');
+    servidor = sistema.servidor;
 
-    const respuesta = await fetch(`http://127.0.0.1:${direccion.port}/api/compras`, {
+    const respuesta = await fetch(sistema.url, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -58,5 +72,16 @@ describe('POST /api/compras integrado', () => {
     expect(
       aplicacion.conexion.baseDatos.prepare('SELECT COUNT(*) cantidad FROM entradas').get(),
     ).toEqual({ cantidad: 2 });
+    expect(pasarela.llamadas).toEqual([{ numeroOrden: cuerpo.numeroOrden, total: 25000 }]);
+    expect(notificador.llamadas).toEqual([
+      expect.objectContaining({
+        email: 'visitante@mail.com',
+        resumen: expect.objectContaining({
+          numeroOrden: cuerpo.numeroOrden,
+          cantidadEntradas: 2,
+          codigoQR: `QR-${cuerpo.numeroOrden}`,
+        }),
+      }),
+    ]);
   });
 });
