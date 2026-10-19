@@ -2,11 +2,14 @@ import { randomUUID } from 'node:crypto';
 import type { ConexionSqlite } from '../../infraestructura/bd/conexion-sqlite';
 import type { NuevaCompra } from './compras.types';
 
+const formatearFechaSql = (fecha: Date): string =>
+  `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
+
 export class SqliteComprasRepository {
   constructor(private readonly conexion: ConexionSqlite) {}
 
   async contarEntradas(email: string, fecha: Date): Promise<number> {
-    const fechaSql = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
+    const fechaSql = formatearFechaSql(fecha);
     const fila = this.conexion.baseDatos
       .prepare(
         `SELECT COUNT(*) cantidad
@@ -21,8 +24,7 @@ export class SqliteComprasRepository {
 
   async guardar(compra: NuevaCompra): Promise<string> {
     const numeroOrden = `ORD-${randomUUID()}`;
-    const fecha = compra.fechaVisita;
-    const fechaSql = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
+    const fechaSql = formatearFechaSql(compra.fechaVisita);
     const baseDatos = this.conexion.baseDatos;
 
     baseDatos.exec('BEGIN');
