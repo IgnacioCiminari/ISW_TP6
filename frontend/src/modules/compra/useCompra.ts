@@ -107,13 +107,13 @@ export const useCompra = () => {
   const precioPorId = new Map(completos.map((c, i) => [c.id, detalle.subtotales[i].precio]));
   const subtotales = visitantes.map((v) => ({ id: v.id, precio: precioPorId.get(v.id) }));
   const total = detalle.total;
-  const visitantesCompletos = completos.length === visitantes.length;
+  const estanCompletos = completos.length === visitantes.length;
 
   const errorPago = formaPago ? undefined : 'Elegí cómo vas a pagar.';
 
   const pasoValido: Record<PasoCompra, boolean> = {
     fecha: !errorFecha,
-    visitantes: visitantesCompletos,
+    visitantes: estanCompletos,
     pago: !errorPago,
   };
 
@@ -129,7 +129,7 @@ export const useCompra = () => {
   };
 
   const confirmar = async () => {
-    if (!fecha || !formaPago || !visitantesCompletos) return;
+    if (!fecha || !formaPago || !estanCompletos) return;
     const solicitud: SolicitudCompraHttp = {
       email: USUARIO_SESION.email,
       fechaVisita: aFechaIso(fecha),
@@ -141,8 +141,8 @@ export const useCompra = () => {
     setErrorEnvio(undefined);
     try {
       const { estado, cuerpo } = await postJson(URL_COMPRAS, solicitud);
-      const exito = estado >= 200 && estado < 300;
-      if (exito) {
+      const esExitosa = estado >= 200 && estado < 300;
+      if (esExitosa) {
         const compra = cuerpo as ResultadoCompraHttp;
         setResultado(compra);
         setEtapa(compra.pago.formaPago === 'TARJETA' ? 'mercado-pago' : 'resultado');

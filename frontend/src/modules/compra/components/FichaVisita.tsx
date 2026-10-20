@@ -42,7 +42,7 @@ export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
             onClick={() => setAbierta((a) => !a)}
             aria-expanded={abierta}
             aria-controls="detalle-ficha"
-            className="-mr-2 ml-auto flex h-9 items-center gap-1 rounded-md px-2 text-sm font-bold text-primario hover:bg-fondo lg:hidden"
+            className="-mr-2 -my-1 ml-auto flex h-11 items-center gap-1 rounded-md px-2 text-sm font-bold text-primario hover:bg-fondo lg:hidden"
           >
             {abierta ? 'Ocultar detalle' : 'Ver detalle'}
             <ChevronUp
@@ -96,7 +96,10 @@ export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
           </dl>
           <p className="pb-1.5 text-right">
             <span className="block text-[13px] font-bold">Total</span>
-            <span className="block text-[26px] font-bold leading-none text-primario cifras">
+            <span
+              className="block text-[26px] font-bold leading-none text-primario cifras"
+              aria-live="polite"
+            >
               {formatearTotal(compra.total)}
             </span>
           </p>

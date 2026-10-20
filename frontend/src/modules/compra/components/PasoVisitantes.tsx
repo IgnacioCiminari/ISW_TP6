@@ -139,6 +139,7 @@ const FilaVisitante = ({
           <div
             role="radiogroup"
             aria-labelledby={`${base}-pase`}
+            aria-invalid={errores?.tipoPase ? true : undefined}
             aria-describedby={errores?.tipoPase ? `${base}-error-pase` : undefined}
           >
             <span id={`${base}-pase`} className="block text-[13px] font-bold text-tinta-suave">
@@ -193,7 +194,7 @@ const FilaVisitante = ({
               type="button"
               onClick={alQuitar}
               aria-label={`Quitar visitante ${numero}`}
-              className="-mr-2 grid size-10 shrink-0 place-items-center rounded-md text-tinta-suave hover:bg-fondo hover:text-alerta"
+              className="-mr-2 grid size-11 shrink-0 place-items-center rounded-md text-tinta-suave hover:bg-fondo hover:text-alerta"
             >
               <Trash2 aria-hidden className="size-5" />
             </button>

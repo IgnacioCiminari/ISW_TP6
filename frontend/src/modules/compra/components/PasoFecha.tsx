@@ -18,7 +18,7 @@ export const PasoFecha = ({ compra }: { compra: EstadoCompra }) => (
         alElegir={compra.setFecha}
         motivoNoDisponible={(fecha) => motivoFechaNoDisponible(fecha, compra.ahora)}
         estaCerrado={(fecha) => !parqueAbierto(fecha)}
-        descripcionId="leyenda-fecha"
+        descripcionId={compra.errorFecha ? 'leyenda-fecha error-fecha' : 'leyenda-fecha'}
       />
       <div className="mt-4 border-t border-renglon pt-3.5" aria-live="polite">
         {compra.fecha ? (
@@ -42,7 +42,10 @@ export const PasoFecha = ({ compra }: { compra: EstadoCompra }) => (
 
 export const EncabezadoPaso = ({ titulo, children }: { titulo: string; children: ReactNode }) => (
   <header className="pb-4 pt-6 lg:pt-8">
-    <h1 className="text-balance text-[26px] font-bold leading-tight text-primario lg:text-3xl">
+    <h1
+      tabIndex={-1}
+      className="text-balance text-[26px] font-bold leading-tight text-primario lg:text-3xl"
+    >
       {titulo}
     </h1>
     <p className="mt-1.5 text-[15px] leading-snug text-tinta-suave">{children}</p>

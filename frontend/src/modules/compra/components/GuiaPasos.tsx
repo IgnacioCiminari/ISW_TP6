@@ -7,10 +7,6 @@ const NOMBRES: Record<PasoCompra, string> = {
   pago: 'Pago',
 };
 
-// El camino hasta el paso actual se pinta entero; la bola actual queda sin pintar hasta completarlo.
-const avanceCamino = (destino: number, actual: number): string =>
-  destino <= actual ? '100%' : '0%';
-
 // Guía de pasos: solo informa. Se avanza con «Continuar» y se vuelve con «Anterior».
 export const GuiaPasos = ({ paso }: { paso: PasoCompra }) => {
   const actual = PASOS.indexOf(paso);
@@ -47,14 +43,14 @@ export const GuiaPasos = ({ paso }: { paso: PasoCompra }) => {
                   {hecho && <span className="sr-only"> (completo)</span>}
                 </span>
               </div>
+              {/* El camino hasta el paso actual se pinta entero; la bola actual queda sin pintar. */}
               {i < PASOS.length - 1 && (
                 <span
                   aria-hidden
                   className="relative mx-2 mt-[14px] h-1 flex-1 overflow-hidden rounded-full bg-tinta-suave/20"
                 >
                   <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-primario transition-[width] duration-[900ms] ease-in-out motion-reduce:transition-none"
-                    style={{ width: avanceCamino(i + 1, actual) }}
+                    className={`absolute inset-0 origin-left rounded-full bg-primario transition-transform duration-[900ms] ease-in-out motion-reduce:transition-none ${i + 1 <= actual ? 'scale-x-100' : 'scale-x-0'}`}
                   />
                 </span>
               )}

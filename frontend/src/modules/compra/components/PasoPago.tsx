@@ -34,6 +34,8 @@ export const PasoPago = ({ compra }: { compra: EstadoCompra }) => (
     )}
 
     <fieldset
+      role="radiogroup"
+      aria-invalid={compra.errorPago ? true : undefined}
       aria-describedby={compra.errorPago ? 'error-pago' : undefined}
       className={`rounded-md bg-superficie p-2 ${compra.errorPago ? 'ring-1 ring-alerta' : ''}`}
     >

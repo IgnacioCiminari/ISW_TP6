@@ -22,7 +22,7 @@ export const ModalMail = ({ email, alCerrar }: { email: string; alCerrar: () => 
         aria-hidden
         className="grid size-12 place-items-center rounded-full bg-acento text-primario"
       >
-        <MailCheck className="size-6" />
+        <MailCheck aria-hidden className="size-6" />
       </span>
       <h2 id="titulo-mail" className="mt-4 text-[22px] font-bold leading-tight text-primario">
         Mail enviado
