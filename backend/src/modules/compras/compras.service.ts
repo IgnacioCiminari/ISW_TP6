@@ -6,9 +6,9 @@ import type {
   ResumenCompra,
   SolicitudCompra,
 } from './compras.types';
+import { MAX_ENTRADAS } from './compras.constants';
 
 const PREFIJO_QR = 'QR-';
-const MAX_ENTRADAS = 10;
 
 export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
@@ -54,8 +54,8 @@ export class ComprasService {
   }
 
   private async validarUsuarioRegistrado(email: string): Promise<void> {
-    const registrado = await this.deps.usuarios.estaRegistrado(email);
-    if (!registrado) {
+    const estaRegistrado = await this.deps.usuarios.estaRegistrado(email);
+    if (!estaRegistrado) {
       throw new Error('Solo los usuarios registrados pueden comprar entradas.');
     }
   }
@@ -68,7 +68,7 @@ export class ComprasService {
 
   private async validarCantidadEntradas(solicitud: SolicitudCompra): Promise<void> {
     if (solicitud.cantidad > MAX_ENTRADAS) {
-      throw new Error('No se pueden comprar más de 10 entradas.');
+      throw new Error(`No se pueden comprar más de ${MAX_ENTRADAS} entradas.`);
     }
     if (solicitud.cantidad === 0) {
       throw new Error('Debe comprar al menos una entrada.');
@@ -79,7 +79,7 @@ export class ComprasService {
       solicitud.fechaVisita,
     );
     if (comprasAnteriores + solicitud.cantidad > MAX_ENTRADAS) {
-      throw new Error('Supera el máximo de 10 entradas para la fecha seleccionada.');
+      throw new Error(`Supera el máximo de ${MAX_ENTRADAS} entradas para la fecha seleccionada.`);
     }
   }
 
@@ -110,7 +110,7 @@ export class ComprasService {
   ): Promise<ResultadoPago> {
     try {
       return await this.deps.pagos.procesarPago(numeroOrden, total, formaPago);
-    } catch (error) {
+    } catch {
       throw new Error('No se pudo iniciar el pago con Mercado Pago.');
     }
   }

@@ -1,3 +1,4 @@
 import { configuracion } from './configuracion';
 
-export const leerConfiguracionSimulacion = () => configuracion.simulacion;
+export const leerConfiguracionSimulacion = (): typeof configuracion.simulacion =>
+  configuracion.simulacion;

@@ -4,11 +4,13 @@ export class ParqueService {
     [0, 1],
   ];
 
+  private static readonly DIA_LUNES = 1; // getDay(): 0 domingo … 6 sábado
+  private static readonly MESES_ANTICIPACION = 1;
   private static readonly HORA_LIMITE = 17;
   private static readonly MINUTO_LIMITE = 30;
 
   estaAbierto(fecha: Date): boolean {
-    const esLunes = fecha.getDay() === 1;
+    const esLunes = fecha.getDay() === ParqueService.DIA_LUNES;
     return !esLunes && !this.esFeriado(fecha);
   }
 
@@ -45,7 +47,11 @@ export class ParqueService {
   }
 
   private calcularLimiteAnticipacion(hoy: Date): Date {
-    return new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
+    return new Date(
+      hoy.getFullYear(),
+      hoy.getMonth() + ParqueService.MESES_ANTICIPACION,
+      hoy.getDate(),
+    );
   }
 
   private esCompraTardiaParaHoy(ahora: Date): boolean {

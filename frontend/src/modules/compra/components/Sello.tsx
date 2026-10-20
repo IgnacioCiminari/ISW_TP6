@@ -1,10 +1,13 @@
 import { useId } from 'react';
+import { PREFIJO_ORDEN } from '@backend/modules/compras/compras.constants';
 
 const LARGO_CODIGO = 8;
 
 // El número de orden es `ORD-<uuid>`: el sello lleva sus primeros caracteres, la ficha el número completo.
-export const codigoCorto = (numeroOrden: string) =>
-  numeroOrden.replace(/^ORD-/, '').slice(0, LARGO_CODIGO).toUpperCase();
+export const codigoCorto = (numeroOrden: string): string =>
+  (numeroOrden.startsWith(PREFIJO_ORDEN) ? numeroOrden.slice(PREFIJO_ORDEN.length) : numeroOrden)
+    .slice(0, LARGO_CODIGO)
+    .toUpperCase();
 
 // Sello circular que marca la ficha confirmada.
 export const Sello = ({ numeroOrden }: { numeroOrden: string }) => {

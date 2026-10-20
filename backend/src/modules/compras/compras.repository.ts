@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { ConexionSqlite } from '../../infraestructura/bd/conexion-sqlite';
 import type { NuevaCompra } from './compras.types';
+import { PREFIJO_ORDEN } from './compras.constants';
 
 const formatearFechaSql = (fecha: Date): string =>
   `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
@@ -23,7 +24,7 @@ export class SqliteComprasRepository {
   }
 
   async guardar(compra: NuevaCompra): Promise<string> {
-    const numeroOrden = `ORD-${randomUUID()}`;
+    const numeroOrden = `${PREFIJO_ORDEN}${randomUUID()}`;
     const fechaSql = formatearFechaSql(compra.fechaVisita);
     const baseDatos = this.conexion.baseDatos;
 

@@ -1,5 +1,6 @@
 import type { ComprasService } from './compras.service';
 import type { SolicitudCompra } from './compras.types';
+import { MAX_ENTRADAS } from './compras.constants';
 
 export interface RespuestaCompraHttp {
   estado: number;
@@ -9,9 +10,9 @@ export interface RespuestaCompraHttp {
 const MENSAJES_DE_REGLA = new Set([
   'Solo los usuarios registrados pueden comprar entradas.',
   'Debe seleccionar una forma de pago.',
-  'No se pueden comprar más de 10 entradas.',
+  `No se pueden comprar más de ${MAX_ENTRADAS} entradas.`,
   'Debe comprar al menos una entrada.',
-  'Supera el máximo de 10 entradas para la fecha seleccionada.',
+  `Supera el máximo de ${MAX_ENTRADAS} entradas para la fecha seleccionada.`,
   'Debe indicar la edad y el tipo de pase de cada visitante.',
   'La fecha de visita no puede ser anterior al día actual.',
   'El parque está cerrado en la fecha seleccionada.',
