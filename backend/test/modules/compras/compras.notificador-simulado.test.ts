@@ -8,7 +8,7 @@ describe('NotificadorSimulado', () => {
     await expect(
       notificador.enviarConfirmacion('visitante@mail.com', {
         numeroOrden: 'ORD-123',
-        fechaVisita: new Date(2026, 9, 20),
+        fechaVisita: new Date(2026, 9, 20), // martes 20/10/2026
         cantidadEntradas: 1,
         formaPago: 'EFECTIVO',
         detalle: { subtotales: [], total: 0 },

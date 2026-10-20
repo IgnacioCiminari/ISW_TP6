@@ -26,7 +26,11 @@ export const PantallaResultado = ({ resultado, fecha, alComprarOtra }: PantallaR
     <section className="mx-auto max-w-xl px-4 pb-12 pt-8 lg:pt-12">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 ref={titulo} tabIndex={-1} className="text-balance text-[28px] font-bold leading-tight text-primario outline-none lg:text-4xl">
+          <h1
+            ref={titulo}
+            tabIndex={-1}
+            className="text-balance text-[28px] font-bold leading-tight text-primario outline-none lg:text-4xl"
+          >
             ¡Listo! Tu visita está asegurada
           </h1>
           <p className="mt-2 text-[17px] leading-snug">
@@ -43,20 +47,25 @@ export const PantallaResultado = ({ resultado, fecha, alComprarOtra }: PantallaR
           <Renglon termino="Fecha">{formatearFecha(fecha)}</Renglon>
           <Renglon termino="Entradas">{entradas}</Renglon>
           <Renglon termino="Pago">
-            {pago.formaPago === 'TARJETA' ? 'Tarjeta · pagado en Mercado Pago' : 'Efectivo · pagás en boletería'}
+            {pago.formaPago === 'TARJETA'
+              ? 'Tarjeta · pagado en Mercado Pago'
+              : 'Efectivo · pagás en boletería'}
           </Renglon>
           <Renglon termino="N.º de orden">
             <span className="break-all text-[13px] cifras">{resultado.numeroOrden}</span>
           </Renglon>
           <Renglon termino="Total">
-            <span className="text-[22px] font-bold text-primario cifras">{formatearTotal(resultado.total)}</span>
+            <span className="text-[22px] font-bold text-primario cifras">
+              {formatearTotal(resultado.total)}
+            </span>
           </Renglon>
         </dl>
       </div>
 
       {pago.formaPago === 'EFECTIVO' && (
         <p className="mt-4 text-[15px] leading-snug text-tinta-suave">
-          Presentá el número de orden en boletería y aboná {formatearTotal(resultado.total)} antes de entrar.
+          Presentá el número de orden en boletería y aboná {formatearTotal(resultado.total)} antes
+          de entrar.
         </p>
       )}
 
@@ -64,7 +73,9 @@ export const PantallaResultado = ({ resultado, fecha, alComprarOtra }: PantallaR
         Comprar otras entradas
       </Boton>
 
-      {mailVisible && <ModalMail email={USUARIO_SESION.email} alCerrar={() => setMailVisible(false)} />}
+      {mailVisible && (
+        <ModalMail email={USUARIO_SESION.email} alCerrar={() => setMailVisible(false)} />
+      )}
     </section>
   );
 };

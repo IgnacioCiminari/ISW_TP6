@@ -18,7 +18,7 @@ export const crearAplicacion = ({
   ruta: string;
   pasarela: PasarelaPago;
   notificador: Notificador;
-}) => {
+}): { conexion: ConexionSqlite; controlador: CompraController } => {
   const conexion = new ConexionSqlite(ruta);
   const comprasService = new ComprasService({
     usuarios: new SqliteUsuariosRepository(conexion),

@@ -22,7 +22,6 @@ const DETALLE: DetallePrecio = {
   total: 25000,
 };
 
-
 const PAGO_TARJETA: ResultadoPago = {
   formaPago: 'TARJETA',
   estado: 'REDIRIGIDO_A_MERCADO_PAGO',
@@ -62,7 +61,7 @@ const crearDependencias = () => ({
       .mockResolvedValue(undefined),
   },
   usuarios: {
-  estaRegistrado: vi.fn<(email: string) => Promise<boolean>>().mockResolvedValue(true),
+    estaRegistrado: vi.fn<(email: string) => Promise<boolean>>().mockResolvedValue(true),
   },
 });
 
@@ -176,66 +175,68 @@ describe('ComprasService.comprarEntradas', () => {
       });
     });
   });
-});
 
-describe('validaciones', () => {
-  it('rechaza la compra de un usuario no registrado', async () => {
-    const deps = crearDependencias();
-    deps.usuarios.estaRegistrado.mockResolvedValue(false);
-    const servicio = new ComprasService(deps);
+  describe('validaciones', () => {
+    it('rechaza la compra de un usuario no registrado', async () => {
+      const deps = crearDependencias();
+      deps.usuarios.estaRegistrado.mockResolvedValue(false);
+      const servicio = new ComprasService(deps);
 
-    await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
-      'Solo los usuarios registrados pueden comprar entradas.',
-    );
-    expect(deps.compras.guardar).not.toHaveBeenCalled();
-  });
-
-  it('rechaza la compra sin forma de pago seleccionada', async () => {
-    const deps = crearDependencias();
-    const servicio = new ComprasService(deps);
-
-    await expect(
-      servicio.comprarEntradas(solicitudValida({ formaPago: undefined })),
-    ).rejects.toThrow('Debe seleccionar una forma de pago.');
-    expect(deps.compras.guardar).not.toHaveBeenCalled();
-    expect(deps.pagos.procesarPago).not.toHaveBeenCalled();
-  });
-    
-  it('rechaza la compra si el parque está cerrado en la fecha elegida', async () => {
-    const deps = crearDependencias();
-    const fechaLunes = new Date(2026, 9, 26); // lunes 26/10/2026
-    const servicio = new ComprasService(deps);
-    
-    deps.parque.validarFechaVisita.mockImplementation((fecha) => {
-      if (fecha.getDay() === 1) {
-        throw new Error('El parque está cerrado en la fecha seleccionada.');
-      }
+      await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
+        'Solo los usuarios registrados pueden comprar entradas.',
+      );
+      expect(deps.compras.guardar).not.toHaveBeenCalled();
     });
-     await expect(servicio.comprarEntradas(solicitudValida({fechaVisita: fechaLunes}))).rejects.toThrow(
-      'El parque está cerrado en la fecha seleccionada.',
-    );
-    expect(deps.compras.guardar).not.toHaveBeenCalled();
-  });
-  
-  it('rechaza la compra de más de 10 entradas', async () => {
-    const deps = crearDependencias();
-    const servicio = new ComprasService(deps);
 
-    await expect(
-      servicio.comprarEntradas(solicitudValida({ cantidad: 11, visitantes: visitantes(11) })),
-    ).rejects.toThrow('No se pueden comprar más de 10 entradas.');
-    expect(deps.compras.guardar).not.toHaveBeenCalled();
- });
- 
-  it('rechaza la compra de 0 entradas', async () => {
-    const servicio = new ComprasService(crearDependencias());
+    it('rechaza la compra sin forma de pago seleccionada', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
 
-    await expect(
-      servicio.comprarEntradas(solicitudValida({ cantidad: 0, visitantes: [] })),
-    ).rejects.toThrow('Debe comprar al menos una entrada.');
-  });
+      await expect(
+        servicio.comprarEntradas(solicitudValida({ formaPago: undefined })),
+      ).rejects.toThrow('Debe seleccionar una forma de pago.');
+      expect(deps.compras.guardar).not.toHaveBeenCalled();
+      expect(deps.pagos.procesarPago).not.toHaveBeenCalled();
+    });
 
-  it('rechaza la compra si con compras anteriores se superan 10 entradas para esa fecha', async () => {
+    it('rechaza la compra si el parque está cerrado en la fecha elegida', async () => {
+      const deps = crearDependencias();
+      const fechaLunes = new Date(2026, 9, 26); // lunes 26/10/2026
+      const servicio = new ComprasService(deps);
+
+      deps.parque.validarFechaVisita.mockImplementation((fecha) => {
+        if (fecha.getDay() === 1) {
+          throw new Error('El parque está cerrado en la fecha seleccionada.');
+        }
+      });
+
+      await expect(
+        servicio.comprarEntradas(solicitudValida({ fechaVisita: fechaLunes })),
+      ).rejects.toThrow('El parque está cerrado en la fecha seleccionada.');
+      expect(deps.compras.guardar).not.toHaveBeenCalled();
+    });
+
+    it('rechaza la compra de más de 10 entradas', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
+
+      await expect(
+        servicio.comprarEntradas(solicitudValida({ cantidad: 11, visitantes: visitantes(11) })),
+      ).rejects.toThrow('No se pueden comprar más de 10 entradas.');
+      expect(deps.compras.guardar).not.toHaveBeenCalled();
+    });
+
+    it('rechaza la compra de 0 entradas', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
+
+      await expect(
+        servicio.comprarEntradas(solicitudValida({ cantidad: 0, visitantes: [] })),
+      ).rejects.toThrow('Debe comprar al menos una entrada.');
+      expect(deps.compras.guardar).not.toHaveBeenCalled();
+    });
+
+    it('rechaza la compra si con compras anteriores se superan 10 entradas para esa fecha', async () => {
       const deps = crearDependencias();
       deps.compras.contarEntradas.mockResolvedValue(9);
       const servicio = new ComprasService(deps);
@@ -247,25 +248,27 @@ describe('validaciones', () => {
       expect(deps.compras.guardar).not.toHaveBeenCalled();
     });
 
-  it('rechaza la compra si no se indican edad y pase de cada visitante', async () => {
-    const servicio = new ComprasService(crearDependencias());
+    it('rechaza la compra si no se indican edad y pase de cada visitante', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
 
-    await expect(
-      servicio.comprarEntradas(solicitudValida({ cantidad: 3, visitantes: visitantes(2) })),
-    ).rejects.toThrow('Debe indicar la edad y el tipo de pase de cada visitante.');
-  });
-  
-  it('no envía el mail de confirmación si el pago no se pudo iniciar', async () => {
-    const deps = crearDependencias();
-    deps.pagos.procesarPago.mockRejectedValue(
+      await expect(
+        servicio.comprarEntradas(solicitudValida({ cantidad: 3, visitantes: visitantes(2) })),
+      ).rejects.toThrow('Debe indicar la edad y el tipo de pase de cada visitante.');
+      expect(deps.compras.guardar).not.toHaveBeenCalled();
+    });
+
+    it('no envía el mail de confirmación si el pago no se pudo iniciar', async () => {
+      const deps = crearDependencias();
+      deps.pagos.procesarPago.mockRejectedValue(
         new Error('No se pudo iniciar el pago con Mercado Pago.'),
       );
-    const servicio = new ComprasService(deps);
+      const servicio = new ComprasService(deps);
 
-    await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
-      'No se pudo iniciar el pago con Mercado Pago.',
-    );
-    expect(deps.notificador.enviarConfirmacion).not.toHaveBeenCalled();
+      await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
+        'No se pudo iniciar el pago con Mercado Pago.',
+      );
+      expect(deps.notificador.enviarConfirmacion).not.toHaveBeenCalled();
+    });
   });
-  
-})
+});

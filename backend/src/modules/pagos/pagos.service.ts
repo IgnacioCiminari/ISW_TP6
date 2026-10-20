@@ -20,10 +20,7 @@ import {
 export class PagosService {
   constructor(private readonly pasarela: PasarelaPago) {}
 
-  calcularPrecioEntrada(
-    edad: number,
-    tipoPase: TipoPase,
-  ): number {
+  calcularPrecioEntrada(edad: number, tipoPase: TipoPase): number {
     if (!Object.hasOwn(PRECIO_ENTRADA_POR_PASE, tipoPase)) {
       throw new Error('El tipo de pase debe ser VIP o REGULAR.');
     }
@@ -39,8 +36,7 @@ export class PagosService {
     }
 
     const pagaMediaEntrada =
-      edad <= EDAD_MAX_MENORES_DESCUENTO ||
-      edad >= EDAD_MIN_JUBILADOS_DESCUENTO;
+      edad <= EDAD_MAX_MENORES_DESCUENTO || edad >= EDAD_MIN_JUBILADOS_DESCUENTO;
 
     if (pagaMediaEntrada) {
       return precioBase * FACTOR_DESCUENTO_MEDIA_ENTRADA;
@@ -54,10 +50,7 @@ export class PagosService {
     let precioTotal = 0;
 
     for (const visitante of visitantes) {
-      const precioVisitante = this.calcularPrecioEntrada(
-        visitante.edad,
-        visitante.tipoPase,
-      );
+      const precioVisitante = this.calcularPrecioEntrada(visitante.edad, visitante.tipoPase);
 
       precioTotal += precioVisitante;
 
@@ -99,10 +92,7 @@ export class PagosService {
     total: number,
   ): Promise<ResultadoPago> {
     try {
-      const preferencia = await this.pasarela.crearPreferencia(
-        numeroOrden,
-        total,
-      );
+      const preferencia = await this.pasarela.crearPreferencia(numeroOrden, total);
 
       return {
         formaPago: 'TARJETA',

@@ -25,7 +25,9 @@ const descripcionDescuento = (precio: number | undefined, tipoPase: TipoPase | u
   if (precio === undefined || !tipoPase) return undefined;
   const completo = PRECIO_ENTRADA_POR_PASE[tipoPase];
   if (precio === completo) return undefined;
-  return precio === 0 ? 'Sin cargo por edad' : `${Math.round((1 - precio / completo) * 100)} % de descuento por edad`;
+  return precio === 0
+    ? 'Sin cargo por edad'
+    : `${Math.round((1 - precio / completo) * 100)} % de descuento por edad`;
 };
 
 export const PasoVisitantes = ({ compra }: { compra: EstadoCompra }) => {
@@ -42,7 +44,11 @@ export const PasoVisitantes = ({ compra }: { compra: EstadoCompra }) => {
             numero={i + 1}
             visitante={visitante}
             precio={compra.subtotales[i]?.precio}
-            errores={compra.mostrarErroresVisitantes ? compra.erroresVisitantes.get(visitante.id) : undefined}
+            errores={
+              compra.mostrarErroresVisitantes
+                ? compra.erroresVisitantes.get(visitante.id)
+                : undefined
+            }
             puedeQuitar={cantidad > 1}
             alCambiar={(cambios) => compra.actualizarVisitante(visitante.id, cambios)}
             alQuitar={() => compra.quitarVisitante(visitante.id)}
@@ -67,8 +73,8 @@ export const PasoVisitantes = ({ compra }: { compra: EstadoCompra }) => {
         <dd className="cifras">{formatearPesos(PRECIO_ENTRADA_POR_PASE.VIP)}</dd>
         <dt>Descuentos</dt>
         <dd>
-          Gratis hasta {EDAD_MAX_NINOS_GRATIS} años · {PORCENTAJE_DESCUENTO} % hasta {EDAD_MAX_MENORES_DESCUENTO} años y
-          desde {EDAD_MIN_JUBILADOS_DESCUENTO}
+          Gratis hasta {EDAD_MAX_NINOS_GRATIS} años · {PORCENTAJE_DESCUENTO} % hasta{' '}
+          {EDAD_MAX_MENORES_DESCUENTO} años y desde {EDAD_MIN_JUBILADOS_DESCUENTO}
         </dd>
       </dl>
     </>
@@ -85,7 +91,15 @@ interface FilaVisitanteProps {
   alQuitar: () => void;
 }
 
-const FilaVisitante = ({ numero, visitante, precio, errores, puedeQuitar, alCambiar, alQuitar }: FilaVisitanteProps) => {
+const FilaVisitante = ({
+  numero,
+  visitante,
+  precio,
+  errores,
+  puedeQuitar,
+  alCambiar,
+  alQuitar,
+}: FilaVisitanteProps) => {
   const base = `visitante-${visitante.id}`;
   const descuento = descripcionDescuento(precio, visitante.tipoPase);
 
@@ -102,7 +116,10 @@ const FilaVisitante = ({ numero, visitante, precio, errores, puedeQuitar, alCamb
         <legend className="sr-only">Visitante {numero}</legend>
         <div className="flex flex-wrap items-start gap-x-3 gap-y-3">
           <div>
-            <label htmlFor={`${base}-edad`} className="block text-[13px] font-bold text-tinta-suave">
+            <label
+              htmlFor={`${base}-edad`}
+              className="block text-[13px] font-bold text-tinta-suave"
+            >
               Edad
             </label>
             <input
@@ -119,7 +136,12 @@ const FilaVisitante = ({ numero, visitante, precio, errores, puedeQuitar, alCamb
             />
           </div>
 
-          <div role="radiogroup" aria-labelledby={`${base}-pase`} aria-describedby={errores?.tipoPase ? `${base}-error-pase` : undefined}>
+          <div
+            role="radiogroup"
+            aria-labelledby={`${base}-pase`}
+            aria-invalid={errores?.tipoPase ? true : undefined}
+            aria-describedby={errores?.tipoPase ? `${base}-error-pase` : undefined}
+          >
             <span id={`${base}-pase`} className="block text-[13px] font-bold text-tinta-suave">
               Pase
             </span>
@@ -149,13 +171,22 @@ const FilaVisitante = ({ numero, visitante, precio, errores, puedeQuitar, alCamb
           </div>
         </div>
         {errores?.edad && <MensajeCampo id={`${base}-error-edad`}>{errores.edad}</MensajeCampo>}
-        {errores?.tipoPase && <MensajeCampo id={`${base}-error-pase`}>{errores.tipoPase}</MensajeCampo>}
+        {errores?.tipoPase && (
+          <MensajeCampo id={`${base}-error-pase`}>{errores.tipoPase}</MensajeCampo>
+        )}
 
         <div className="mt-2.5 flex min-h-10 items-center gap-3">
-          <p aria-live="polite" className="flex flex-1 flex-wrap items-baseline justify-between gap-x-3">
+          <p
+            aria-live="polite"
+            className="flex flex-1 flex-wrap items-baseline justify-between gap-x-3"
+          >
             <span className="text-[13px] text-tinta-suave">{descuento}</span>
             <span className="ml-auto text-right text-[17px] font-bold cifras">
-              {precio === undefined ? <span className="font-normal text-tinta-suave">—</span> : formatearPesos(precio)}
+              {precio === undefined ? (
+                <span className="font-normal text-tinta-suave">—</span>
+              ) : (
+                formatearPesos(precio)
+              )}
             </span>
           </p>
           {puedeQuitar && (
@@ -163,7 +194,7 @@ const FilaVisitante = ({ numero, visitante, precio, errores, puedeQuitar, alCamb
               type="button"
               onClick={alQuitar}
               aria-label={`Quitar visitante ${numero}`}
-              className="-mr-2 grid size-10 shrink-0 place-items-center rounded-md text-tinta-suave hover:bg-fondo hover:text-alerta"
+              className="-mr-2 grid size-11 shrink-0 place-items-center rounded-md text-tinta-suave hover:bg-fondo hover:text-alerta"
             >
               <Trash2 aria-hidden className="size-5" />
             </button>

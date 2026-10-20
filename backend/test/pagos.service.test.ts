@@ -1,13 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { PagosService } from '../src/modules/pagos/pagos.service';
-import type {
-  FormaPago,
-  PasarelaPago,
-  TipoPase,
-} from '../src/modules/pagos/pagos.types';
+import type { FormaPago, PasarelaPago, TipoPase } from '../src/modules/pagos/pagos.types';
 
-const URL_MP =
-  'https://sandbox.mercadopago.com.ar/checkout?pref_id=pref-123';
+const URL_MP = 'https://sandbox.mercadopago.com.ar/checkout?pref_id=pref-123';
 
 const crearPasarelaFalsa = () => ({
   crearPreferencia: vi.fn<PasarelaPago['crearPreferencia']>().mockResolvedValue({
@@ -22,11 +17,7 @@ describe('PagosService', () => {
       const pasarela = crearPasarelaFalsa();
       const pagos = new PagosService(pasarela);
 
-      const resultado = await pagos.procesarPago(
-        'ORD-0001',
-        25000,
-        'EFECTIVO',
-      );
+      const resultado = await pagos.procesarPago('ORD-0001', 25000, 'EFECTIVO');
 
       expect(resultado).toEqual({
         formaPago: 'EFECTIVO',
@@ -39,16 +30,9 @@ describe('PagosService', () => {
       const pasarela = crearPasarelaFalsa();
       const pagos = new PagosService(pasarela);
 
-      const resultado = await pagos.procesarPago(
-        'ORD-0001',
-        25000,
-        'TARJETA',
-      );
+      const resultado = await pagos.procesarPago('ORD-0001', 25000, 'TARJETA');
 
-      expect(pasarela.crearPreferencia).toHaveBeenCalledWith(
-        'ORD-0001',
-        25000,
-      );
+      expect(pasarela.crearPreferencia).toHaveBeenCalledWith('ORD-0001', 25000);
       expect(resultado).toEqual({
         formaPago: 'TARJETA',
         estado: 'REDIRIGIDO_A_MERCADO_PAGO',
@@ -59,9 +43,9 @@ describe('PagosService', () => {
     it('rechaza una forma de pago no soportada', async () => {
       const pagos = new PagosService(crearPasarelaFalsa());
 
-      await expect(
-        pagos.procesarPago('ORD-0001', 25000, 'CHEQUE' as FormaPago),
-      ).rejects.toThrow('Forma de pago no soportada.');
+      await expect(pagos.procesarPago('ORD-0001', 25000, 'CHEQUE' as FormaPago)).rejects.toThrow(
+        'Forma de pago no soportada.',
+      );
     });
 
     it('informa un error claro si Mercado Pago no responde', async () => {
@@ -69,9 +53,7 @@ describe('PagosService', () => {
       pasarela.crearPreferencia.mockRejectedValue(new Error('timeout'));
       const pagos = new PagosService(pasarela);
 
-      await expect(
-        pagos.procesarPago('ORD-0001', 25000, 'TARJETA'),
-      ).rejects.toThrow(
+      await expect(pagos.procesarPago('ORD-0001', 25000, 'TARJETA')).rejects.toThrow(
         'No se pudo iniciar el pago con Mercado Pago.',
       );
     });
@@ -91,25 +73,20 @@ describe('PagosService', () => {
       [59, 'REGULAR', 10000],
       [60, 'VIP', 10000],
       [85, 'REGULAR', 5000],
-    ])(
-      'debe un visitante de %i años con pase %s pagar $%i',
-      (edad, tipoPase, precioEsperado) => {
-        expect(
-          pagos.calcularPrecioEntrada(edad, tipoPase),
-        ).toBe(precioEsperado);
-      },
-    );
+    ])('debe un visitante de %i años con pase %s pagar $%i', (edad, tipoPase, precioEsperado) => {
+      expect(pagos.calcularPrecioEntrada(edad, tipoPase)).toBe(precioEsperado);
+    });
 
     it('debe rechazar una edad negativa', () => {
-      expect(() =>
-        pagos.calcularPrecioEntrada(-1, 'REGULAR'),
-      ).toThrow('La edad del visitante no es válida.');
+      expect(() => pagos.calcularPrecioEntrada(-1, 'REGULAR')).toThrow(
+        'La edad del visitante no es válida.',
+      );
     });
 
     it('debe rechazar un tipo de pase inexistente', () => {
-      expect(() =>
-        pagos.calcularPrecioEntrada(30, 'PLATINO' as TipoPase),
-      ).toThrow('El tipo de pase debe ser VIP o REGULAR.');
+      expect(() => pagos.calcularPrecioEntrada(30, 'PLATINO' as TipoPase)).toThrow(
+        'El tipo de pase debe ser VIP o REGULAR.',
+      );
     });
   });
 

@@ -24,17 +24,28 @@ export const CompraPage = () => {
   }, [compra.paso, compra.etapa]);
 
   if (compra.etapa === 'mercado-pago' && compra.resultado) {
-    return <PantallaMercadoPago resultado={compra.resultado} alVolver={() => compra.setEtapa('resultado')} />;
+    return (
+      <PantallaMercadoPago
+        resultado={compra.resultado}
+        alVolver={() => compra.setEtapa('resultado')}
+      />
+    );
   }
 
   if (compra.etapa === 'resultado' && compra.resultado && compra.fecha) {
-    return <PantallaResultado resultado={compra.resultado} fecha={compra.fecha} alComprarOtra={compra.volverAEmpezar} />;
+    return (
+      <PantallaResultado
+        resultado={compra.resultado}
+        fecha={compra.fecha}
+        alComprarOtra={compra.volverAEmpezar}
+      />
+    );
   }
 
   return (
     <div className="mx-auto max-w-xl px-4 lg:grid lg:max-w-5xl lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-x-10">
       <div ref={contenido} className="pb-56 lg:pb-16 [&_h1]:outline-none">
-        <GuiaPasos paso={compra.paso} pasoMaximo={compra.pasoMaximo} irAPaso={compra.irAPaso} />
+        <GuiaPasos paso={compra.paso} />
         <form
           noValidate
           onSubmit={(e) => {

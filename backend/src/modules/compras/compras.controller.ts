@@ -1,5 +1,6 @@
 import type { ComprasService } from './compras.service';
 import type { SolicitudCompra } from './compras.types';
+import { MAX_ENTRADAS } from './compras.constants';
 
 export interface RespuestaCompraHttp {
   estado: number;
@@ -9,9 +10,9 @@ export interface RespuestaCompraHttp {
 const MENSAJES_DE_REGLA = new Set([
   'Solo los usuarios registrados pueden comprar entradas.',
   'Debe seleccionar una forma de pago.',
-  'No se pueden comprar más de 10 entradas.',
+  `No se pueden comprar más de ${MAX_ENTRADAS} entradas.`,
   'Debe comprar al menos una entrada.',
-  'Supera el máximo de 10 entradas para la fecha seleccionada.',
+  `Supera el máximo de ${MAX_ENTRADAS} entradas para la fecha seleccionada.`,
   'Debe indicar la edad y el tipo de pase de cada visitante.',
   'La fecha de visita no puede ser anterior al día actual.',
   'El parque está cerrado en la fecha seleccionada.',
@@ -28,23 +29,43 @@ const leerFechaLocal = (valor: unknown): Date | undefined => {
   if (typeof valor !== 'string') return undefined;
   const coincidencia = /^(\d{4})-(\d{2})-(\d{2})$/.exec(valor);
   if (!coincidencia) return undefined;
-  const fecha = new Date(Number(coincidencia[1]), Number(coincidencia[2]) - 1, Number(coincidencia[3]));
-  return fecha.getFullYear() === Number(coincidencia[1])
-    && fecha.getMonth() === Number(coincidencia[2]) - 1
-    && fecha.getDate() === Number(coincidencia[3])
+  const fecha = new Date(
+    Number(coincidencia[1]),
+    Number(coincidencia[2]) - 1,
+    Number(coincidencia[3]),
+  );
+  return fecha.getFullYear() === Number(coincidencia[1]) &&
+    fecha.getMonth() === Number(coincidencia[2]) - 1 &&
+    fecha.getDate() === Number(coincidencia[3])
     ? fecha
     : undefined;
 };
 
 const leerSolicitud = (cuerpo: unknown): SolicitudCompra | undefined => {
-  if (!esRegistro(cuerpo) || typeof cuerpo.email !== 'string' || typeof cuerpo.cantidad !== 'number' || !Number.isInteger(cuerpo.cantidad)) {
+  if (
+    !esRegistro(cuerpo) ||
+    typeof cuerpo.email !== 'string' ||
+    typeof cuerpo.cantidad !== 'number' ||
+    !Number.isInteger(cuerpo.cantidad)
+  ) {
     return undefined;
   }
   const fechaVisita = leerFechaLocal(cuerpo.fechaVisita);
-  if (!fechaVisita || !Array.isArray(cuerpo.visitantes) || (cuerpo.formaPago !== 'EFECTIVO' && cuerpo.formaPago !== 'TARJETA')) {
+  if (
+    !fechaVisita ||
+    !Array.isArray(cuerpo.visitantes) ||
+    (cuerpo.formaPago !== 'EFECTIVO' && cuerpo.formaPago !== 'TARJETA')
+  ) {
     return undefined;
   }
-  if (!cuerpo.visitantes.every((visitante) => esRegistro(visitante) && typeof visitante.edad === 'number' && (visitante.tipoPase === 'VIP' || visitante.tipoPase === 'REGULAR'))) {
+  if (
+    !cuerpo.visitantes.every(
+      (visitante) =>
+        esRegistro(visitante) &&
+        typeof visitante.edad === 'number' &&
+        (visitante.tipoPase === 'VIP' || visitante.tipoPase === 'REGULAR'),
+    )
+  ) {
     return undefined;
   }
   return {

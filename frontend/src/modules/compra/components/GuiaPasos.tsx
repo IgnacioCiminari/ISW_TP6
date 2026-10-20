@@ -7,46 +7,53 @@ const NOMBRES: Record<PasoCompra, string> = {
   pago: 'Pago',
 };
 
-interface GuiaPasosProps {
-  paso: PasoCompra;
-  pasoMaximo: number;
-  irAPaso: (paso: PasoCompra) => void;
-}
-
-// Palabras guía: los tres pasos siempre nombrados, el actual marcado y los hechos con tilde.
-export const GuiaPasos = ({ paso, pasoMaximo, irAPaso }: GuiaPasosProps) => {
+// Guía de pasos: solo informa. Se avanza con «Continuar» y se vuelve con «Anterior».
+export const GuiaPasos = ({ paso }: { paso: PasoCompra }) => {
   const actual = PASOS.indexOf(paso);
   return (
-    <nav aria-label="Pasos de la compra" className="border-b border-primario/20">
-      <ol className="flex">
+    <nav aria-label="Pasos de la compra" className="pb-2 pt-4">
+      <ol className="flex items-start">
         {PASOS.map((p, i) => {
           const esActual = i === actual;
-          const hecho = i < pasoMaximo && !esActual;
-          const alcanzable = i <= pasoMaximo && !esActual;
+          const hecho = i < actual;
           return (
-            <li key={p} className="flex-1">
-              <button
-                type="button"
-                onClick={() => irAPaso(p)}
-                disabled={!alcanzable}
-                aria-current={esActual ? 'step' : undefined}
-                className={[
-                  'relative flex h-12 w-full items-center gap-1.5 text-[15px] disabled:cursor-default',
-                  i === 0 ? 'justify-start' : i === PASOS.length - 1 ? 'justify-end' : 'justify-center',
-                  esActual ? 'font-bold text-primario' : hecho ? 'text-tinta hover:text-primario' : 'text-tinta-suave',
-                ].join(' ')}
-              >
-                {hecho ? (
-                  <Check aria-hidden className="size-4 text-secundario" strokeWidth={3} />
-                ) : (
-                  <span aria-hidden className="cifras text-[13px]">
-                    {i + 1}
-                  </span>
-                )}
-                {NOMBRES[p]}
-                {hecho && <span className="sr-only"> (completo)</span>}
-                {esActual && <span aria-hidden className="absolute inset-x-0 -bottom-px h-[3px] rounded-full bg-primario" />}
-              </button>
+            <li
+              key={p}
+              className="flex flex-1 items-start last:flex-none"
+              aria-current={esActual ? 'step' : undefined}
+            >
+              <div className="flex flex-col items-center gap-1.5">
+                <span
+                  aria-hidden
+                  className={[
+                    'grid size-8 place-items-center rounded-full border-2 text-[13px] font-bold transition-colors duration-500 cifras',
+                    hecho
+                      ? 'border-primario bg-primario text-superficie'
+                      : esActual
+                        ? 'border-primario bg-superficie text-primario'
+                        : 'border-tinta-suave/40 bg-fondo text-tinta-suave',
+                  ].join(' ')}
+                >
+                  {hecho ? <Check className="size-4" strokeWidth={3} /> : i + 1}
+                </span>
+                <span
+                  className={`text-[15px] ${esActual ? 'font-bold text-primario' : hecho ? 'text-tinta' : 'text-tinta-suave'}`}
+                >
+                  {NOMBRES[p]}
+                  {hecho && <span className="sr-only"> (completo)</span>}
+                </span>
+              </div>
+              {/* El camino hasta el paso actual se pinta entero; la bola actual queda sin pintar. */}
+              {i < PASOS.length - 1 && (
+                <span
+                  aria-hidden
+                  className="relative mx-2 mt-[14px] h-1 flex-1 overflow-hidden rounded-full bg-tinta-suave/20"
+                >
+                  <span
+                    className={`absolute inset-0 origin-left rounded-full bg-primario transition-transform duration-[900ms] ease-in-out motion-reduce:transition-none ${i + 1 <= actual ? 'scale-x-100' : 'scale-x-0'}`}
+                  />
+                </span>
+              )}
             </li>
           );
         })}
