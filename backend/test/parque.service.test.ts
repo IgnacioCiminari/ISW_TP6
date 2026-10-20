@@ -114,5 +114,11 @@ describe('ParqueService', () => {
 
       expect(() => parque.validarFechaVisita(fecha(2026, 10, 14), ahora)).not.toThrow();
     });
+
+    it('acepta comprar para mañana a las 22:00 de Córdoba aunque en UTC ya sea ese día', () => {
+      const ahora = enCordoba(2026, 10, 14, 22, 0); // miércoles 14/10/2026, jueves 15/10 01:00 UTC
+
+      expect(() => parque.validarFechaVisita(fecha(2026, 10, 15), ahora)).not.toThrow();
+    });
   });
 });
