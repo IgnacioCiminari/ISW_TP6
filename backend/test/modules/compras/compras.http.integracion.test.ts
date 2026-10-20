@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Server } from 'node:http';
 import { crearAplicacion } from '../../../src/aplicacion';
 import { crearServidor } from '../../../src/servidor-http';
@@ -32,7 +32,13 @@ describe('POST /api/compras integrado', () => {
   let servidor: Server | undefined;
   let cerrarBaseDatos: (() => void) | undefined;
 
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 20, 10, 0)); // martes 20/10/2026, 10:00
+  });
+
   afterEach(async () => {
+    vi.useRealTimers();
     if (servidor?.listening) {
       await new Promise<void>((resolve, reject) =>
         servidor?.close((error) => (error ? reject(error) : resolve())),
