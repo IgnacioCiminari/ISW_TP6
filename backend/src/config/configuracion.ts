@@ -4,7 +4,8 @@ export const configuracion = {
     ruta: './bd/data/parque.sqlite',
   },
   servidor: {
-    host: '127.0.0.1',
+    // En Docker se usa HOST=0.0.0.0 para aceptar conexiones de otros contenedores.
+    host: process.env.HOST ?? '127.0.0.1',
     puerto: 3000,
   },
   simulacion: {

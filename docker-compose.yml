@@ -1,0 +1,34 @@
+services:
+  backend:
+    build: ./backend
+    volumes:
+      - datos-bd:/app/bd/data
+    restart: unless-stopped
+    healthcheck:
+      # El back no tiene endpoint de salud: cualquier respuesta HTTP (aunque sea 404) indica que está escuchando.
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(() => process.exit(0), () => process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      additional_contexts:
+        backend: ./backend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  datos-bd:

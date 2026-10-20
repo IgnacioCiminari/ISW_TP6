@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+test
+vitest.config.ts
+bd/data/*.sqlite
+*.log
+.env*
+Dockerfile
+.dockerignore
