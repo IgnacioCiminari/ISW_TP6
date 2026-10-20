@@ -74,7 +74,6 @@ export const useCompra = () => {
   const ahora = new Date();
   const [etapa, setEtapa] = useState<Etapa>('formulario');
   const [paso, setPaso] = useState<PasoCompra>('fecha');
-  const [pasoMaximo, setPasoMaximo] = useState(0);
   const [fecha, setFecha] = useState<Date>();
   const [visitantes, setVisitantes] = useState<VisitanteFormulario[]>(() => [nuevoVisitante()]);
   const [formaPago, setFormaPago] = useState<FormaPago>();
@@ -109,11 +108,15 @@ export const useCompra = () => {
     pago: !errorPago,
   };
 
-  const irAPaso = (destino: PasoCompra) => {
-    if (PASOS.indexOf(destino) <= pasoMaximo) {
-      setErrorEnvio(undefined);
-      setPaso(destino);
-    }
+  // Solo se vuelve con «Anterior»: lo cargado en el paso que se abandona se descarta.
+  const retroceder = () => {
+    const actual = PASOS.indexOf(paso);
+    if (actual === 0) return;
+    if (paso === 'visitantes') setVisitantes([nuevoVisitante()]);
+    if (paso === 'pago') setFormaPago(undefined);
+    setIntentoAvanzar((previo) => ({ ...previo, [paso]: false }));
+    setErrorEnvio(undefined);
+    setPaso(PASOS[actual - 1]);
   };
 
   const confirmar = async () => {
@@ -154,9 +157,7 @@ export const useCompra = () => {
       void confirmar();
       return;
     }
-    const siguiente = PASOS.indexOf(paso) + 1;
-    setPasoMaximo((maximo) => Math.max(maximo, siguiente));
-    setPaso(PASOS[siguiente]);
+    setPaso(PASOS[PASOS.indexOf(paso) + 1]);
   };
 
   const agregarVisitante = () => setVisitantes((lista) => [...lista, nuevoVisitante()]);
@@ -175,7 +176,6 @@ export const useCompra = () => {
   const volverAEmpezar = () => {
     setEtapa('formulario');
     setPaso('fecha');
-    setPasoMaximo(0);
     setFecha(undefined);
     setVisitantes([nuevoVisitante()]);
     setFormaPago(undefined);
@@ -189,9 +189,8 @@ export const useCompra = () => {
     etapa,
     setEtapa,
     paso,
-    pasoMaximo,
-    irAPaso,
     continuar,
+    retroceder,
     fecha,
     setFecha,
     errorFecha: intentoAvanzar.fecha ? errorFecha : undefined,

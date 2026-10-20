@@ -34,7 +34,7 @@ export const CompraPage = () => {
   return (
     <div className="mx-auto max-w-xl px-4 lg:grid lg:max-w-5xl lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-x-10">
       <div ref={contenido} className="pb-56 lg:pb-16 [&_h1]:outline-none">
-        <GuiaPasos paso={compra.paso} pasoMaximo={compra.pasoMaximo} irAPaso={compra.irAPaso} />
+        <GuiaPasos paso={compra.paso} />
         <form
           noValidate
           onSubmit={(e) => {

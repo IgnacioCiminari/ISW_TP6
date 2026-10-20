@@ -1,4 +1,5 @@
-import { ChevronUp, LoaderCircle } from 'lucide-react';
+import { ChevronLeft, ChevronUp, LoaderCircle } from 'lucide-react';
+import { PASOS } from '../useCompra';
 import { useState, type ReactNode } from 'react';
 import { Boton } from '../../../shared/ui/Boton';
 import { formatearFecha, formatearPesos, formatearTotal } from '../../../shared/ui/formato';
@@ -20,7 +21,8 @@ const NOMBRE_FORMA_PAGO = { TARJETA: 'Tarjeta (Mercado Pago)', EFECTIVO: 'Efecti
 export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
   const [abierta, setAbierta] = useState(false);
   const cantidad = compra.visitantes.length;
-  const enPasoVisitantesOMas = compra.pasoMaximo >= 1;
+  const enPasoVisitantesOMas = PASOS.indexOf(compra.paso) >= 1;
+  const puedeVolver = compra.paso !== 'fecha';
 
   return (
     <aside
@@ -99,16 +101,31 @@ export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
           </span>
         </div>
 
-        <Boton ancho onClick={compra.continuar} disabled={compra.enviando} aria-describedby={compra.errorEnvio ? 'error-envio' : undefined}>
-          {compra.enviando ? (
-            <>
-              <LoaderCircle aria-hidden className="size-5 animate-spin" />
-              Confirmando…
-            </>
-          ) : (
-            ACCION[compra.paso]
+        {/* En el celular van en fila; en la columna lateral, apilados para que «Continuar» use todo el ancho. */}
+        <div className="flex gap-3 lg:flex-col-reverse">
+          {puedeVolver && (
+            <Boton variante="secundario" className="h-13 shrink-0 px-3.5 lg:h-12 lg:w-full" onClick={compra.retroceder} disabled={compra.enviando}>
+              <ChevronLeft aria-hidden className="-ml-1 size-5" />
+              Anterior
+            </Boton>
           )}
-        </Boton>
+          <Boton
+            ancho
+            className="min-w-0 px-4"
+            onClick={compra.continuar}
+            disabled={compra.enviando}
+            aria-describedby={compra.errorEnvio ? 'error-envio' : undefined}
+          >
+            {compra.enviando ? (
+              <>
+                <LoaderCircle aria-hidden className="size-5 animate-spin" />
+                Confirmando…
+              </>
+            ) : (
+              ACCION[compra.paso]
+            )}
+          </Boton>
+        </div>
       </div>
     </aside>
   );
