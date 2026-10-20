@@ -24,7 +24,7 @@ export class ParqueService {
   }
 
   validarFechaVisita(fechaVisita: Date, ahora: Date = new Date()): void {
-    const hoy = this.soloFecha(ahora);
+    const hoy = this.fechaEnCordoba(ahora);
     const visita = this.soloFecha(fechaVisita);
 
     if (visita < hoy) {
@@ -53,6 +53,20 @@ export class ParqueService {
 
   private soloFecha(d: Date): Date {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  private fechaEnCordoba(ahora: Date): Date {
+    const partes = new Intl.DateTimeFormat('es-AR', {
+      timeZone: ParqueService.ZONA_HORARIA,
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+    }).formatToParts(ahora);
+    const anio = Number(partes.find((parte) => parte.type === 'year')?.value);
+    const mes = Number(partes.find((parte) => parte.type === 'month')?.value);
+    const dia = Number(partes.find((parte) => parte.type === 'day')?.value);
+
+    return new Date(anio, mes - 1, dia);
   }
 
   private calcularLimiteAnticipacion(hoy: Date): Date {
