@@ -27,7 +27,15 @@ export const Sello = ({ numeroOrden }: { numeroOrden: string }) => {
           ECOHARMONY PARK · BIOPARQUE · CONFIRMADA ·
         </textPath>
       </text>
-      <text x="70" y="64" textAnchor="middle" fill="currentColor" fontSize="9.5" fontWeight="700" letterSpacing="1.5">
+      <text
+        x="70"
+        y="64"
+        textAnchor="middle"
+        fill="currentColor"
+        fontSize="9.5"
+        fontWeight="700"
+        letterSpacing="1.5"
+      >
         ORDEN
       </text>
       <text

@@ -14,7 +14,10 @@ export const formatearPesos = (importe: number): string =>
 export const formatearTotal = (importe: number): string => formatoPesos.format(importe);
 
 // larga: «sábado, 24 de octubre de 2026» · media: «sábado, 24 de octubre» · corta: «sáb, 24 oct»
-export const formatearFecha = (fecha: Date, estilo: 'larga' | 'media' | 'corta' = 'larga'): string =>
+export const formatearFecha = (
+  fecha: Date,
+  estilo: 'larga' | 'media' | 'corta' = 'larga',
+): string =>
   new Intl.DateTimeFormat('es-AR', {
     weekday: estilo === 'corta' ? 'short' : 'long',
     day: 'numeric',
@@ -29,4 +32,6 @@ export const aFechaIso = (fecha: Date): string =>
   `${fecha.getFullYear()}-${dosDigitos(fecha.getMonth() + 1)}-${dosDigitos(fecha.getDate())}`;
 
 export const mismoDia = (a: Date, b: Date): boolean =>
-  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();

@@ -35,18 +35,28 @@ const diasDelMes = (mes: Date) =>
   );
 
 const primeroDelMes = (fecha: Date) => new Date(fecha.getFullYear(), fecha.getMonth(), 1);
-const moverMes = (mes: Date, delta: number) => new Date(mes.getFullYear(), mes.getMonth() + delta, 1);
+const moverMes = (mes: Date, delta: number) =>
+  new Date(mes.getFullYear(), mes.getMonth() + delta, 1);
 
 // La semana arranca el lunes: domingo (0) pasa a la última columna.
 const columnaInicial = (mes: Date) => (mes.getDay() + 6) % 7;
 
-export const Calendario = ({ valor, hoy, alElegir, motivoNoDisponible, estaCerrado, descripcionId }: CalendarioProps) => {
+export const Calendario = ({
+  valor,
+  hoy,
+  alElegir,
+  motivoNoDisponible,
+  estaCerrado,
+  descripcionId,
+}: CalendarioProps) => {
   const tituloId = useId();
   const [visible, setVisible] = useState(() => primeroDelMes(valor ?? hoy));
 
   // Se navega entre el mes actual y los meses que tengan algún día a la venta.
   const hayAnterior = visible > primeroDelMes(hoy);
-  const haySiguiente = diasDelMes(moverMes(visible, 1)).some((d) => motivoNoDisponible(d) === undefined);
+  const haySiguiente = diasDelMes(moverMes(visible, 1)).some(
+    (d) => motivoNoDisponible(d) === undefined,
+  );
 
   return (
     <div role="group" aria-labelledby={tituloId} aria-describedby={descripcionId}>

@@ -38,7 +38,6 @@ const crearSistema = () => {
 const visitantes = (cantidad: number): Visitante[] =>
   Array.from({ length: cantidad }, () => ({ edad: 30, tipoPase: 'REGULAR' }));
 
-
 describe('US Comprar entradas - pruebas de usuario', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] });

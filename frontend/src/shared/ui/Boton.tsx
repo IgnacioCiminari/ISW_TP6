@@ -15,10 +15,17 @@ const ESTILOS: Record<Variante, string> = {
   secundario:
     // Fondo transparente: no compite con el principal. Al pasar el cursor se tiñe de verde medio.
     'h-12 px-5 border-[1.5px] border-secundario bg-transparent text-primario font-bold hover:border-primario hover:bg-secundario/20 active:bg-secundario/30 disabled:opacity-50 disabled:hover:bg-transparent',
-  texto: 'h-11 px-2 text-primario font-bold underline underline-offset-4 decoration-1 hover:decoration-2',
+  texto:
+    'h-11 px-2 text-primario font-bold underline underline-offset-4 decoration-1 hover:decoration-2',
 };
 
-export const Boton = ({ variante = 'primario', ancho = false, className = '', children, ...props }: BotonProps) => (
+export const Boton = ({
+  variante = 'primario',
+  ancho = false,
+  className = '',
+  children,
+  ...props
+}: BotonProps) => (
   <button
     type="button"
     className={`inline-flex items-center justify-center gap-2 rounded-md transition-colors duration-150 disabled:cursor-not-allowed ${ESTILOS[variante]} ${ancho ? 'w-full' : ''} ${className}`}

@@ -8,9 +8,7 @@ import { CompraController } from '../../../src/modules/compras/compras.controlle
 class ComprasServiceFalso implements Pick<ComprasService, 'comprarEntradas'> {
   solicitudes: SolicitudCompra[] = [];
 
-  constructor(
-    private readonly resultado: ResultadoCompra | Error,
-  ) {}
+  constructor(private readonly resultado: ResultadoCompra | Error) {}
 
   async comprarEntradas(solicitud: SolicitudCompra): Promise<ResultadoCompra> {
     this.solicitudes.push(solicitud);
@@ -37,7 +35,9 @@ const cuerpoValido = {
   formaPago: 'EFECTIVO',
 };
 
-const iniciar = async (servicio: ComprasServiceFalso): Promise<{ servidor: Server; url: string }> => {
+const iniciar = async (
+  servicio: ComprasServiceFalso,
+): Promise<{ servidor: Server; url: string }> => {
   const servidor = crearServidor(new CompraController(servicio));
   await new Promise<void>((resolve) => servidor.listen(0, '127.0.0.1', resolve));
   const direccion = servidor.address();
@@ -49,7 +49,10 @@ describe('CompraController', () => {
   let servidor: Server | undefined;
 
   afterEach(async () => {
-    if (servidor?.listening) await new Promise<void>((resolve, reject) => servidor?.close((error) => error ? reject(error) : resolve()));
+    if (servidor?.listening)
+      await new Promise<void>((resolve, reject) =>
+        servidor?.close((error) => (error ? reject(error) : resolve())),
+      );
   });
 
   it('confirma una solicitud válida con 201', async () => {

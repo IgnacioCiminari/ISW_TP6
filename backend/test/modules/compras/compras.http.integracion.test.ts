@@ -35,7 +35,7 @@ describe('POST /api/compras integrado', () => {
   afterEach(async () => {
     if (servidor?.listening) {
       await new Promise<void>((resolve, reject) =>
-        servidor?.close((error) => error ? reject(error) : resolve()),
+        servidor?.close((error) => (error ? reject(error) : resolve())),
       );
     }
     cerrarBaseDatos?.();
@@ -61,7 +61,10 @@ describe('POST /api/compras integrado', () => {
         formaPago: 'TARJETA',
       }),
     });
-    const cuerpo = await respuesta.json() as { numeroOrden: string; pago: { urlRedireccion: string } };
+    const cuerpo = (await respuesta.json()) as {
+      numeroOrden: string;
+      pago: { urlRedireccion: string };
+    };
 
     expect(respuesta.status).toBe(201);
     expect(cuerpo.numeroOrden).toMatch(/^ORD-/);

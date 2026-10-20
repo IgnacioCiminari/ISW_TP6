@@ -8,7 +8,8 @@ const NOMBRES: Record<PasoCompra, string> = {
 };
 
 // El camino hasta el paso actual se pinta entero; la bola actual queda sin pintar hasta completarlo.
-const avanceCamino = (destino: number, actual: number): string => (destino <= actual ? '100%' : '0%');
+const avanceCamino = (destino: number, actual: number): string =>
+  destino <= actual ? '100%' : '0%';
 
 // Guía de pasos: solo informa. Se avanza con «Continuar» y se vuelve con «Anterior».
 export const GuiaPasos = ({ paso }: { paso: PasoCompra }) => {
@@ -20,7 +21,11 @@ export const GuiaPasos = ({ paso }: { paso: PasoCompra }) => {
           const esActual = i === actual;
           const hecho = i < actual;
           return (
-            <li key={p} className="flex flex-1 items-start last:flex-none" aria-current={esActual ? 'step' : undefined}>
+            <li
+              key={p}
+              className="flex flex-1 items-start last:flex-none"
+              aria-current={esActual ? 'step' : undefined}
+            >
               <div className="flex flex-col items-center gap-1.5">
                 <span
                   aria-hidden
@@ -43,7 +48,10 @@ export const GuiaPasos = ({ paso }: { paso: PasoCompra }) => {
                 </span>
               </div>
               {i < PASOS.length - 1 && (
-                <span aria-hidden className="relative mx-2 mt-[14px] h-1 flex-1 overflow-hidden rounded-full bg-tinta-suave/20">
+                <span
+                  aria-hidden
+                  className="relative mx-2 mt-[14px] h-1 flex-1 overflow-hidden rounded-full bg-tinta-suave/20"
+                >
                   <span
                     className="absolute inset-y-0 left-0 rounded-full bg-primario transition-[width] duration-[900ms] ease-in-out motion-reduce:transition-none"
                     style={{ width: avanceCamino(i + 1, actual) }}

@@ -22,7 +22,6 @@ const DETALLE: DetallePrecio = {
   total: 25000,
 };
 
-
 const PAGO_TARJETA: ResultadoPago = {
   formaPago: 'TARJETA',
   estado: 'REDIRIGIDO_A_MERCADO_PAGO',
@@ -62,7 +61,7 @@ const crearDependencias = () => ({
       .mockResolvedValue(undefined),
   },
   usuarios: {
-  estaRegistrado: vi.fn<(email: string) => Promise<boolean>>().mockResolvedValue(true),
+    estaRegistrado: vi.fn<(email: string) => Promise<boolean>>().mockResolvedValue(true),
   },
 });
 
@@ -200,23 +199,23 @@ describe('validaciones', () => {
     expect(deps.compras.guardar).not.toHaveBeenCalled();
     expect(deps.pagos.procesarPago).not.toHaveBeenCalled();
   });
-    
+
   it('rechaza la compra si el parque está cerrado en la fecha elegida', async () => {
     const deps = crearDependencias();
     const fechaLunes = new Date(2026, 9, 26); // lunes 26/10/2026
     const servicio = new ComprasService(deps);
-    
+
     deps.parque.validarFechaVisita.mockImplementation((fecha) => {
       if (fecha.getDay() === 1) {
         throw new Error('El parque está cerrado en la fecha seleccionada.');
       }
     });
-     await expect(servicio.comprarEntradas(solicitudValida({fechaVisita: fechaLunes}))).rejects.toThrow(
-      'El parque está cerrado en la fecha seleccionada.',
-    );
+    await expect(
+      servicio.comprarEntradas(solicitudValida({ fechaVisita: fechaLunes })),
+    ).rejects.toThrow('El parque está cerrado en la fecha seleccionada.');
     expect(deps.compras.guardar).not.toHaveBeenCalled();
   });
-  
+
   it('rechaza la compra de más de 10 entradas', async () => {
     const deps = crearDependencias();
     const servicio = new ComprasService(deps);
@@ -225,8 +224,8 @@ describe('validaciones', () => {
       servicio.comprarEntradas(solicitudValida({ cantidad: 11, visitantes: visitantes(11) })),
     ).rejects.toThrow('No se pueden comprar más de 10 entradas.');
     expect(deps.compras.guardar).not.toHaveBeenCalled();
- });
- 
+  });
+
   it('rechaza la compra de 0 entradas', async () => {
     const servicio = new ComprasService(crearDependencias());
 
@@ -236,16 +235,16 @@ describe('validaciones', () => {
   });
 
   it('rechaza la compra si con compras anteriores se superan 10 entradas para esa fecha', async () => {
-      const deps = crearDependencias();
-      deps.compras.contarEntradas.mockResolvedValue(9);
-      const servicio = new ComprasService(deps);
+    const deps = crearDependencias();
+    deps.compras.contarEntradas.mockResolvedValue(9);
+    const servicio = new ComprasService(deps);
 
-      await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
-        'Supera el máximo de 10 entradas para la fecha seleccionada.',
-      );
-      expect(deps.compras.contarEntradas).toHaveBeenCalledWith(EMAIL, FECHA_VISITA);
-      expect(deps.compras.guardar).not.toHaveBeenCalled();
-    });
+    await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
+      'Supera el máximo de 10 entradas para la fecha seleccionada.',
+    );
+    expect(deps.compras.contarEntradas).toHaveBeenCalledWith(EMAIL, FECHA_VISITA);
+    expect(deps.compras.guardar).not.toHaveBeenCalled();
+  });
 
   it('rechaza la compra si no se indican edad y pase de cada visitante', async () => {
     const servicio = new ComprasService(crearDependencias());
@@ -254,12 +253,12 @@ describe('validaciones', () => {
       servicio.comprarEntradas(solicitudValida({ cantidad: 3, visitantes: visitantes(2) })),
     ).rejects.toThrow('Debe indicar la edad y el tipo de pase de cada visitante.');
   });
-  
+
   it('no envía el mail de confirmación si el pago no se pudo iniciar', async () => {
     const deps = crearDependencias();
     deps.pagos.procesarPago.mockRejectedValue(
-        new Error('No se pudo iniciar el pago con Mercado Pago.'),
-      );
+      new Error('No se pudo iniciar el pago con Mercado Pago.'),
+    );
     const servicio = new ComprasService(deps);
 
     await expect(servicio.comprarEntradas(solicitudValida())).rejects.toThrow(
@@ -267,5 +266,4 @@ describe('validaciones', () => {
     );
     expect(deps.notificador.enviarConfirmacion).not.toHaveBeenCalled();
   });
-  
-})
+});

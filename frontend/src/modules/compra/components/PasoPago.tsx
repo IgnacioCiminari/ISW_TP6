@@ -23,7 +23,9 @@ const FORMAS: { valor: FormaPago; titulo: string; detalle: string; Icono: Lucide
 
 export const PasoPago = ({ compra }: { compra: EstadoCompra }) => (
   <>
-    <EncabezadoPaso titulo="¿Cómo pagás?">Revisá la ficha y elegí la forma de pago para confirmar.</EncabezadoPaso>
+    <EncabezadoPaso titulo="¿Cómo pagás?">
+      Revisá la ficha y elegí la forma de pago para confirmar.
+    </EncabezadoPaso>
 
     {compra.errorEnvio && (
       <div className="mb-4">
@@ -67,7 +69,9 @@ export const PasoPago = ({ compra }: { compra: EstadoCompra }) => (
                 <Icono aria-hidden className="size-[18px] text-primario" />
                 {titulo}
               </span>
-              <span className={`mt-0.5 block text-[15px] leading-snug ${elegida ? 'text-tinta' : 'text-tinta-suave'}`}>
+              <span
+                className={`mt-0.5 block text-[15px] leading-snug ${elegida ? 'text-tinta' : 'text-tinta-suave'}`}
+              >
                 {detalle}
               </span>
             </span>

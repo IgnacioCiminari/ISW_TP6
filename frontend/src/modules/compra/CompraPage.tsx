@@ -24,11 +24,22 @@ export const CompraPage = () => {
   }, [compra.paso, compra.etapa]);
 
   if (compra.etapa === 'mercado-pago' && compra.resultado) {
-    return <PantallaMercadoPago resultado={compra.resultado} alVolver={() => compra.setEtapa('resultado')} />;
+    return (
+      <PantallaMercadoPago
+        resultado={compra.resultado}
+        alVolver={() => compra.setEtapa('resultado')}
+      />
+    );
   }
 
   if (compra.etapa === 'resultado' && compra.resultado && compra.fecha) {
-    return <PantallaResultado resultado={compra.resultado} fecha={compra.fecha} alComprarOtra={compra.volverAEmpezar} />;
+    return (
+      <PantallaResultado
+        resultado={compra.resultado}
+        fecha={compra.fecha}
+        alComprarOtra={compra.volverAEmpezar}
+      />
+    );
   }
 
   return (

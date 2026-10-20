@@ -38,7 +38,8 @@ const URL_COMPRAS = '/api/compras';
 const nuevoVisitante = (): VisitanteFormulario => ({ id: crypto.randomUUID(), edad: '' });
 
 /** Edad como número entero, o `undefined` si el campo no tiene un número. */
-export const leerEdad = (texto: string): number | undefined => (/^\d+$/.test(texto.trim()) ? Number(texto) : undefined);
+export const leerEdad = (texto: string): number | undefined =>
+  /^\d+$/.test(texto.trim()) ? Number(texto) : undefined;
 
 /** El visitante con el tipo que espera el backend, o `undefined` si falta completar algún campo. */
 const aVisitante = ({ edad, tipoPase }: VisitanteFormulario): Visitante | undefined => {
@@ -60,12 +61,20 @@ export const parqueAbierto = (fecha: Date): boolean => parque.estaAbierto(fecha)
 
 // Sin estos campos no se puede armar la solicitud; las reglas de negocio las valida el backend al confirmar.
 const validarCampos = (visitante: VisitanteFormulario): ErroresVisitante => ({
-  edad: visitante.edad.trim() === '' ? 'Ingresá la edad.' : leerEdad(visitante.edad) === undefined ? 'Ingresá la edad en años.' : undefined,
+  edad:
+    visitante.edad.trim() === ''
+      ? 'Ingresá la edad.'
+      : leerEdad(visitante.edad) === undefined
+        ? 'Ingresá la edad en años.'
+        : undefined,
   tipoPase: visitante.tipoPase ? undefined : 'Elegí un pase.',
 });
 
 const leerMensajeError = (cuerpo: unknown): string | undefined =>
-  typeof cuerpo === 'object' && cuerpo !== null && 'error' in cuerpo && typeof cuerpo.error === 'string'
+  typeof cuerpo === 'object' &&
+  cuerpo !== null &&
+  'error' in cuerpo &&
+  typeof cuerpo.error === 'string'
     ? cuerpo.error
     : undefined;
 
@@ -140,7 +149,8 @@ export const useCompra = () => {
       } else {
         // El backend siempre responde `{ error }` con su mensaje; sin él no hay API (p. ej. el sitio estático).
         setErrorEnvio(
-          leerMensajeError(cuerpo) ?? 'El servicio de compras no está disponible en este momento. Probá más tarde.',
+          leerMensajeError(cuerpo) ??
+            'El servicio de compras no está disponible en este momento. Probá más tarde.',
         );
       }
     } catch (error) {

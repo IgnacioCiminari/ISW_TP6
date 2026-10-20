@@ -7,7 +7,9 @@ import { motivoFechaNoDisponible, parqueAbierto, type EstadoCompra } from '../us
 
 export const PasoFecha = ({ compra }: { compra: EstadoCompra }) => (
   <>
-    <EncabezadoPaso titulo="¿Qué día venís?">Elegí un día disponible en el calendario.</EncabezadoPaso>
+    <EncabezadoPaso titulo="¿Qué día venís?">
+      Elegí un día disponible en el calendario.
+    </EncabezadoPaso>
 
     <div className="rounded-md bg-superficie p-4 sm:p-5">
       <Calendario
@@ -21,7 +23,8 @@ export const PasoFecha = ({ compra }: { compra: EstadoCompra }) => (
       <div className="mt-4 border-t border-renglon pt-3.5" aria-live="polite">
         {compra.fecha ? (
           <p className="text-[15px]">
-            Elegiste el <strong className="font-bold text-primario">{formatearFecha(compra.fecha)}</strong>.
+            Elegiste el{' '}
+            <strong className="font-bold text-primario">{formatearFecha(compra.fecha)}</strong>.
           </p>
         ) : (
           <p className="text-[15px] text-tinta-suave">Tocá un día disponible.</p>
@@ -39,7 +42,9 @@ export const PasoFecha = ({ compra }: { compra: EstadoCompra }) => (
 
 export const EncabezadoPaso = ({ titulo, children }: { titulo: string; children: ReactNode }) => (
   <header className="pb-4 pt-6 lg:pt-8">
-    <h1 className="text-balance text-[26px] font-bold leading-tight text-primario lg:text-3xl">{titulo}</h1>
+    <h1 className="text-balance text-[26px] font-bold leading-tight text-primario lg:text-3xl">
+      {titulo}
+    </h1>
     <p className="mt-1.5 text-[15px] leading-snug text-tinta-suave">{children}</p>
   </header>
 );

@@ -50,7 +50,9 @@ describe('SqliteComprasRepository', () => {
     });
     expect(
       conexion.baseDatos
-        .prepare('SELECT edad, tipo_pase, precio FROM entradas WHERE numero_orden = ? ORDER BY edad')
+        .prepare(
+          'SELECT edad, tipo_pase, precio FROM entradas WHERE numero_orden = ? ORDER BY edad',
+        )
         .all(numeroOrden),
     ).toEqual([
       { edad: 10, tipo_pase: 'REGULAR', precio: 5000 },
