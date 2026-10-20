@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 import { ParqueService } from '../src/modules/parque/parque.service';
 
 // fecha(2026, 10, 14) = 14/10/2026 en hora local (el helper corrige el mes 0-11 de Date).
@@ -86,6 +86,26 @@ describe('ParqueService', () => {
 
     it('acepta una fecha exactamente un mes después de hoy', () => {
       expect(() => parque.validarFechaVisita(fecha(2026, 11, 14), ahora)).not.toThrow();
+    });
+  });
+
+  // En Docker el proceso corre en UTC: las reglas horarias tienen que seguir en hora de Córdoba.
+  describe('validarFechaVisita con el proceso en UTC', () => {
+    const zonaOriginal = process.env.TZ;
+
+    beforeEach(() => {
+      process.env.TZ = 'UTC';
+    });
+
+    afterEach(() => {
+      if (zonaOriginal === undefined) delete process.env.TZ;
+      else process.env.TZ = zonaOriginal;
+    });
+
+    it('acepta el día actual a las 15:00 de Córdoba aunque en UTC ya pasaron las 17:30', () => {
+      const ahora = new Date('2026-10-14T15:00:00-03:00'); // miércoles 14/10/2026, 18:00 UTC
+
+      expect(() => parque.validarFechaVisita(fecha(2026, 10, 14), ahora)).not.toThrow();
     });
   });
 });
