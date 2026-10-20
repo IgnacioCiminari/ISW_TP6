@@ -9,6 +9,15 @@ export class ParqueService {
   private static readonly HORA_LIMITE = 17;
   private static readonly MINUTO_LIMITE = 30;
 
+  // Las reglas horarias se evalúan en hora de Córdoba, sin importar la zona del proceso.
+  private static readonly ZONA_HORARIA = 'America/Argentina/Cordoba';
+  private static readonly FORMATO_HORA = new Intl.DateTimeFormat('es-AR', {
+    timeZone: ParqueService.ZONA_HORARIA,
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h23',
+  });
+
   estaAbierto(fecha: Date): boolean {
     const esLunes = fecha.getDay() === ParqueService.DIA_LUNES;
     return !esLunes && !this.esFeriado(fecha);
@@ -55,12 +64,7 @@ export class ParqueService {
   }
 
   private esCompraTardiaParaHoy(ahora: Date): boolean {
-    const partes = new Intl.DateTimeFormat('es-AR', {
-      timeZone: 'America/Argentina/Cordoba',
-      hour: 'numeric',
-      minute: 'numeric',
-      hourCycle: 'h23',
-    }).formatToParts(ahora);
+    const partes = ParqueService.FORMATO_HORA.formatToParts(ahora);
     const hora = Number(partes.find((parte) => parte.type === 'hour')?.value);
     const minuto = Number(partes.find((parte) => parte.type === 'minute')?.value);
 

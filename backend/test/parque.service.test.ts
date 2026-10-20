@@ -2,8 +2,15 @@ import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 import { ParqueService } from '../src/modules/parque/parque.service';
 
 // fecha(2026, 10, 14) = 14/10/2026 en hora local (el helper corrige el mes 0-11 de Date).
-const fecha = (anio: number, mes: number, dia: number, hora = 0, minuto = 0) =>
-  new Date(anio, mes - 1, dia, hora, minuto);
+const fecha = (anio: number, mes: number, dia: number) => new Date(anio, mes - 1, dia);
+
+const dosDigitos = (n: number) => String(n).padStart(2, '0');
+
+// Instante en hora de Córdoba (UTC-3 todo el año: Argentina no tiene horario de verano).
+const enCordoba = (anio: number, mes: number, dia: number, hora: number, minuto: number) =>
+  new Date(
+    `${anio}-${dosDigitos(mes)}-${dosDigitos(dia)}T${dosDigitos(hora)}:${dosDigitos(minuto)}:00-03:00`,
+  );
 
 describe('ParqueService', () => {
   const parque = new ParqueService();
@@ -37,7 +44,7 @@ describe('ParqueService', () => {
 
   describe('validarFechaVisita', () => {
     // Miércoles 14/10/2026 a las 10:00
-    const ahora = fecha(2026, 10, 14, 10, 0);
+    const ahora = enCordoba(2026, 10, 14, 10, 0);
 
     it('acepta una fecha futura en la que el parque está abierto', () => {
       expect(() => parque.validarFechaVisita(fecha(2026, 10, 15), ahora)).not.toThrow();
@@ -64,7 +71,7 @@ describe('ParqueService', () => {
     // =====
     it('rechaza el día actual si se compra después de las 17:30', () => {
       expect(() =>
-        parque.validarFechaVisita(fecha(2026, 10, 14), fecha(2026, 10, 14, 17, 31)),
+        parque.validarFechaVisita(fecha(2026, 10, 14), enCordoba(2026, 10, 14, 17, 31)),
       ).toThrow('Las entradas para el día actual solo pueden comprarse hasta las 17:30.');
     });
 
@@ -74,13 +81,13 @@ describe('ParqueService', () => {
 
     it('acepta el día actual si se compra exactamente a las 17:30', () => {
       expect(() =>
-        parque.validarFechaVisita(fecha(2026, 10, 14), fecha(2026, 10, 14, 17, 30)),
+        parque.validarFechaVisita(fecha(2026, 10, 14), enCordoba(2026, 10, 14, 17, 30)),
       ).not.toThrow();
     });
 
     it('rechaza el 25 de diciembre porque el parque está cerrado', () => {
       expect(() =>
-        parque.validarFechaVisita(fecha(2026, 12, 25), fecha(2026, 12, 1, 10, 0)),
+        parque.validarFechaVisita(fecha(2026, 12, 25), enCordoba(2026, 12, 1, 10, 0)),
       ).toThrow('El parque está cerrado en la fecha seleccionada.');
     });
 
@@ -103,7 +110,7 @@ describe('ParqueService', () => {
     });
 
     it('acepta el día actual a las 15:00 de Córdoba aunque en UTC ya pasaron las 17:30', () => {
-      const ahora = new Date('2026-10-14T15:00:00-03:00'); // miércoles 14/10/2026, 18:00 UTC
+      const ahora = enCordoba(2026, 10, 14, 15, 0); // miércoles 14/10/2026, 18:00 UTC
 
       expect(() => parque.validarFechaVisita(fecha(2026, 10, 14), ahora)).not.toThrow();
     });
