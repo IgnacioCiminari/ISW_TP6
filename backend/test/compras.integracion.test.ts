@@ -22,17 +22,18 @@ const crearSistema = () => {
       .fn<(email: string, resumen: ResumenCompra) => Promise<void>>()
       .mockResolvedValue(undefined),
   };
+  const compras = {
+    contarEntradas: async () => 0,
+    guardar: vi.fn<(compra: NuevaCompra) => Promise<string>>().mockResolvedValue('ORD-0001'),
+  };
   const servicio = new ComprasService({
     parque: new ParqueService(),
     pagos: new PagosService(pasarela),
     usuarios: { estaRegistrado: async () => true },
-    compras: {
-      contarEntradas: async () => 0,
-      guardar: async (_compra: NuevaCompra) => 'ORD-0001',
-    },
+    compras,
     notificador,
   });
-  return { servicio, pasarela, notificador };
+  return { servicio, pasarela, notificador, compras };
 };
 
 const visitantes = (cantidad: number): Visitante[] =>
@@ -53,7 +54,7 @@ describe('US Comprar entradas - pruebas de usuario', () => {
 
     const resultado = await servicio.comprarEntradas({
       email: 'visitante@mail.com',
-      fechaVisita: new Date(2026, 9, 15),
+      fechaVisita: new Date(2026, 9, 15), // jueves 15/10/2026
       cantidad: 3,
       visitantes: [
         { edad: 40, tipoPase: 'VIP' },
@@ -66,7 +67,7 @@ describe('US Comprar entradas - pruebas de usuario', () => {
     expect(resultado).toMatchObject({
       numeroOrden: 'ORD-0001',
       cantidadEntradas: 3,
-      fechaVisita: new Date(2026, 9, 15),
+      fechaVisita: new Date(2026, 9, 15), // jueves 15/10/2026
       total: 30000,
       pago: { formaPago: 'TARJETA', urlRedireccion: URL_MP },
     });
@@ -78,21 +79,22 @@ describe('US Comprar entradas - pruebas de usuario', () => {
   });
 
   it('compra sin seleccionar forma de pago (falla)', async () => {
-    const { servicio } = crearSistema();
+    const { servicio, compras } = crearSistema();
 
     await expect(
       // @ts-expect-error: se omite formaPago a propósito para probar la validación
       servicio.comprarEntradas({
         email: 'visitante@mail.com',
-        fechaVisita: new Date(2026, 9, 15),
+        fechaVisita: new Date(2026, 9, 15), // jueves 15/10/2026
         cantidad: 2,
         visitantes: visitantes(2),
       }),
     ).rejects.toThrow('Debe seleccionar una forma de pago.');
+    expect(compras.guardar).not.toHaveBeenCalled();
   });
 
   it('compra para una fecha en la que el parque está cerrado (falla)', async () => {
-    const { servicio } = crearSistema();
+    const { servicio, compras } = crearSistema();
 
     await expect(
       servicio.comprarEntradas({
@@ -103,19 +105,21 @@ describe('US Comprar entradas - pruebas de usuario', () => {
         formaPago: 'EFECTIVO',
       }),
     ).rejects.toThrow('El parque está cerrado en la fecha seleccionada.');
+    expect(compras.guardar).not.toHaveBeenCalled();
   });
 
   it('compra de más de 10 entradas (falla)', async () => {
-    const { servicio } = crearSistema();
+    const { servicio, compras } = crearSistema();
 
     await expect(
       servicio.comprarEntradas({
         email: 'visitante@mail.com',
-        fechaVisita: new Date(2026, 9, 15),
+        fechaVisita: new Date(2026, 9, 15), // jueves 15/10/2026
         cantidad: 11,
         visitantes: visitantes(11),
         formaPago: 'TARJETA',
       }),
     ).rejects.toThrow('No se pueden comprar más de 10 entradas.');
+    expect(compras.guardar).not.toHaveBeenCalled();
   });
 });

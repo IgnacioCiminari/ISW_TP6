@@ -36,7 +36,7 @@ describe('ParqueService', () => {
   });
 
   describe('validarFechaVisita', () => {
-    // Miércoles 15/10/2026 a las 10:00
+    // Miércoles 14/10/2026 a las 10:00
     const ahora = fecha(2026, 10, 14, 10, 0);
 
     it('acepta una fecha futura en la que el parque está abierto', () => {

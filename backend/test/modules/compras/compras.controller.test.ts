@@ -19,15 +19,15 @@ class ComprasServiceFalso implements Pick<ComprasService, 'comprarEntradas'> {
   }
 }
 
-const resultado: ResultadoCompra = {
+const RESULTADO: ResultadoCompra = {
   numeroOrden: 'ORD-1',
   cantidadEntradas: 1,
-  fechaVisita: new Date(2026, 9, 20),
+  fechaVisita: new Date(2026, 9, 20), // martes 20/10/2026
   total: 10000,
   pago: { formaPago: 'EFECTIVO', estado: 'PENDIENTE_EN_BOLETERIA' },
 };
 
-const cuerpoValido = {
+const CUERPO_VALIDO = {
   email: 'visitante@mail.com',
   fechaVisita: '2026-10-20',
   cantidad: 1,
@@ -56,23 +56,25 @@ describe('CompraController', () => {
   });
 
   it('confirma una solicitud válida con 201', async () => {
-    const servicio = new ComprasServiceFalso(resultado);
+    const servicio = new ComprasServiceFalso(RESULTADO);
     const sistema = await iniciar(servicio);
     servidor = sistema.servidor;
 
     const respuesta = await fetch(sistema.url, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(cuerpoValido),
+      body: JSON.stringify(CUERPO_VALIDO),
     });
 
     expect(respuesta.status).toBe(201);
     expect(await respuesta.json()).toMatchObject({ numeroOrden: 'ORD-1' });
-    expect(servicio.solicitudes).toEqual([{ ...cuerpoValido, fechaVisita: new Date(2026, 9, 20) }]);
+    expect(servicio.solicitudes).toEqual([
+      { ...CUERPO_VALIDO, fechaVisita: new Date(2026, 9, 20) }, // martes 20/10/2026
+    ]);
   });
 
   it('rechaza JSON inválido con 400', async () => {
-    const sistema = await iniciar(new ComprasServiceFalso(resultado));
+    const sistema = await iniciar(new ComprasServiceFalso(RESULTADO));
     servidor = sistema.servidor;
 
     const respuesta = await fetch(sistema.url, { method: 'POST', body: '{' });
@@ -89,7 +91,7 @@ describe('CompraController', () => {
     const respuesta = await fetch(sistema.url, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(cuerpoValido),
+      body: JSON.stringify(CUERPO_VALIDO),
     });
 
     expect(respuesta.status).toBe(422);
@@ -102,7 +104,7 @@ describe('CompraController', () => {
     const respuesta = await fetch(sistema.url, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(cuerpoValido),
+      body: JSON.stringify(CUERPO_VALIDO),
     });
 
     expect(respuesta.status).toBe(500);
