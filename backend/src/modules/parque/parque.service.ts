@@ -55,8 +55,14 @@ export class ParqueService {
   }
 
   private esCompraTardiaParaHoy(ahora: Date): boolean {
-    const hora = ahora.getHours();
-    const minuto = ahora.getMinutes();
+    const partes = new Intl.DateTimeFormat('es-AR', {
+      timeZone: 'America/Argentina/Cordoba',
+      hour: 'numeric',
+      minute: 'numeric',
+      hourCycle: 'h23',
+    }).formatToParts(ahora);
+    const hora = Number(partes.find((parte) => parte.type === 'hour')?.value);
+    const minuto = Number(partes.find((parte) => parte.type === 'minute')?.value);
 
     return (
       hora > ParqueService.HORA_LIMITE ||
