@@ -1,3 +1,5 @@
+type ParteFecha = 'year' | 'month' | 'day' | 'hour' | 'minute';
+
 export class ParqueService {
   private static readonly FERIADOS: [number, number][] = [
     [11, 25],
@@ -11,8 +13,11 @@ export class ParqueService {
 
   // Las reglas horarias se evalúan en hora de Córdoba, sin importar la zona del proceso.
   private static readonly ZONA_HORARIA = 'America/Argentina/Cordoba';
-  private static readonly FORMATO_HORA = new Intl.DateTimeFormat('es-AR', {
+  private static readonly FORMATO_CORDOBA = new Intl.DateTimeFormat('es-AR', {
     timeZone: ParqueService.ZONA_HORARIA,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
     hour: 'numeric',
     minute: 'numeric',
     hourCycle: 'h23',
@@ -55,18 +60,24 @@ export class ParqueService {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
-  private fechaEnCordoba(ahora: Date): Date {
-    const partes = new Intl.DateTimeFormat('es-AR', {
-      timeZone: ParqueService.ZONA_HORARIA,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-    }).formatToParts(ahora);
-    const anio = Number(partes.find((parte) => parte.type === 'year')?.value);
-    const mes = Number(partes.find((parte) => parte.type === 'month')?.value);
-    const dia = Number(partes.find((parte) => parte.type === 'day')?.value);
+  /** Año, mes (1-12), día, hora y minuto de un instante en hora de Córdoba. */
+  private partesEnCordoba(instante: Date): Record<ParteFecha, number> {
+    const partes = ParqueService.FORMATO_CORDOBA.formatToParts(instante);
+    const leer = (tipo: ParteFecha): number =>
+      Number(partes.find((parte) => parte.type === tipo)?.value);
 
-    return new Date(anio, mes - 1, dia);
+    return {
+      year: leer('year'),
+      month: leer('month'),
+      day: leer('day'),
+      hour: leer('hour'),
+      minute: leer('minute'),
+    };
+  }
+
+  private fechaEnCordoba(ahora: Date): Date {
+    const { year, month, day } = this.partesEnCordoba(ahora);
+    return new Date(year, month - 1, day);
   }
 
   private calcularLimiteAnticipacion(hoy: Date): Date {
@@ -78,9 +89,7 @@ export class ParqueService {
   }
 
   private esCompraTardiaParaHoy(ahora: Date): boolean {
-    const partes = ParqueService.FORMATO_HORA.formatToParts(ahora);
-    const hora = Number(partes.find((parte) => parte.type === 'hour')?.value);
-    const minuto = Number(partes.find((parte) => parte.type === 'minute')?.value);
+    const { hour: hora, minute: minuto } = this.partesEnCordoba(ahora);
 
     return (
       hora > ParqueService.HORA_LIMITE ||
