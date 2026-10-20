@@ -1,0 +1,112 @@
+@import 'tailwindcss';
+@import '@fontsource/lato/400.css';
+@import '@fontsource/lato/700.css';
+
+/*
+ * Paleta oficial (FAQ 3, CONVENCIONES.md §1.1). Tailwind la publica una sola vez como
+ * variables en :root y genera las utilidades (bg-primario, text-alerta, border-renglon...).
+ * Renglón, tinta y tinta-suave son tonos derivados de la paleta para filetes y texto.
+ */
+@theme {
+  --color-primario: #386641;
+  --color-secundario: #6a994e;
+  --color-acento: #a7c957;
+  --color-fondo: #f2e8cf;
+  --color-alerta: #bc4749;
+  --color-superficie: #ffffff;
+
+  --color-renglon: #e3d8ba;
+  --color-tinta: #1f3a25;
+  --color-tinta-suave: #4b5a44;
+
+  --font-sans: Lato, system-ui, sans-serif;
+
+  --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scrollbar-color: var(--color-secundario) var(--color-fondo);
+  }
+
+  body {
+    @apply bg-fondo font-sans text-tinta antialiased;
+    caret-color: var(--color-primario);
+  }
+
+  ::selection {
+    background: var(--color-acento);
+    color: var(--color-tinta);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primario);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role='radio'],
+  label:has(input) {
+    cursor: pointer;
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  dialog::backdrop {
+    background: rgb(31 58 37 / 0.45);
+  }
+}
+
+/* Filete de 1px entre filas de una hoja, inset como los renglones de una etiqueta. */
+@utility renglon-arriba {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0.75rem;
+    top: -2px;
+    height: 1px;
+    background: var(--color-renglon);
+  }
+}
+
+@utility cifras {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* El sello del número de orden: único momento animado de la app. */
+@keyframes sellar {
+  0% {
+    opacity: 0;
+    transform: scale(1.35) rotate(-18deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.96) rotate(-6deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-8deg);
+  }
+}
+
+.sello {
+  transform: rotate(-8deg);
+  animation: sellar 520ms var(--ease-salida) 200ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sello {
+    animation: none;
+  }
+}
