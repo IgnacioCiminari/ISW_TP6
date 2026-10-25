@@ -70,6 +70,22 @@ const validarCampos = (visitante: VisitanteFormulario): ErroresVisitante => ({
   tipoPase: visitante.tipoPase ? undefined : 'Elegí un pase.',
 });
 
+// Lo justo para mostrar el resultado: número de orden, cantidad, total y forma de pago.
+const esResultadoCompra = (cuerpo: unknown): cuerpo is ResultadoCompraHttp =>
+  typeof cuerpo === 'object' &&
+  cuerpo !== null &&
+  'numeroOrden' in cuerpo &&
+  typeof cuerpo.numeroOrden === 'string' &&
+  'cantidadEntradas' in cuerpo &&
+  typeof cuerpo.cantidadEntradas === 'number' &&
+  'total' in cuerpo &&
+  typeof cuerpo.total === 'number' &&
+  'pago' in cuerpo &&
+  typeof cuerpo.pago === 'object' &&
+  cuerpo.pago !== null &&
+  'formaPago' in cuerpo.pago &&
+  (cuerpo.pago.formaPago === 'TARJETA' || cuerpo.pago.formaPago === 'EFECTIVO');
+
 const leerMensajeError = (cuerpo: unknown): string | undefined =>
   typeof cuerpo === 'object' &&
   cuerpo !== null &&
@@ -142,10 +158,9 @@ export const useCompra = () => {
     try {
       const { estado, cuerpo } = await postJson(URL_COMPRAS, solicitud);
       const esExitosa = estado >= 200 && estado < 300;
-      if (esExitosa) {
-        const compra = cuerpo as ResultadoCompraHttp;
-        setResultado(compra);
-        setEtapa(compra.pago.formaPago === 'TARJETA' ? 'mercado-pago' : 'resultado');
+      if (esExitosa && esResultadoCompra(cuerpo)) {
+        setResultado(cuerpo);
+        setEtapa(cuerpo.pago.formaPago === 'TARJETA' ? 'mercado-pago' : 'resultado');
       } else {
         // El backend siempre responde `{ error }` con su mensaje; sin él no hay API (p. ej. el sitio estático).
         setErrorEnvio(
