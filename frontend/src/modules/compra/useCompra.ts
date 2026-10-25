@@ -38,7 +38,8 @@ const URL_COMPRAS = '/api/compras';
 const nuevoVisitante = (): VisitanteFormulario => ({ id: crypto.randomUUID(), edad: '' });
 
 /** Edad como número entero, o `undefined` si el campo no tiene un número. */
-export const leerEdad = (texto: string): number | undefined => (/^\d+$/.test(texto.trim()) ? Number(texto) : undefined);
+export const leerEdad = (texto: string): number | undefined =>
+  /^\d+$/.test(texto.trim()) ? Number(texto) : undefined;
 
 /** El visitante con el tipo que espera el backend, o `undefined` si falta completar algún campo. */
 const aVisitante = ({ edad, tipoPase }: VisitanteFormulario): Visitante | undefined => {
@@ -60,12 +61,36 @@ export const parqueAbierto = (fecha: Date): boolean => parque.estaAbierto(fecha)
 
 // Sin estos campos no se puede armar la solicitud; las reglas de negocio las valida el backend al confirmar.
 const validarCampos = (visitante: VisitanteFormulario): ErroresVisitante => ({
-  edad: visitante.edad.trim() === '' ? 'Ingresá la edad.' : leerEdad(visitante.edad) === undefined ? 'Ingresá la edad en años.' : undefined,
+  edad:
+    visitante.edad.trim() === ''
+      ? 'Ingresá la edad.'
+      : leerEdad(visitante.edad) === undefined
+        ? 'Ingresá la edad en años.'
+        : undefined,
   tipoPase: visitante.tipoPase ? undefined : 'Elegí un pase.',
 });
 
+// Lo justo para mostrar el resultado: número de orden, cantidad, total y forma de pago.
+const esResultadoCompra = (cuerpo: unknown): cuerpo is ResultadoCompraHttp =>
+  typeof cuerpo === 'object' &&
+  cuerpo !== null &&
+  'numeroOrden' in cuerpo &&
+  typeof cuerpo.numeroOrden === 'string' &&
+  'cantidadEntradas' in cuerpo &&
+  typeof cuerpo.cantidadEntradas === 'number' &&
+  'total' in cuerpo &&
+  typeof cuerpo.total === 'number' &&
+  'pago' in cuerpo &&
+  typeof cuerpo.pago === 'object' &&
+  cuerpo.pago !== null &&
+  'formaPago' in cuerpo.pago &&
+  (cuerpo.pago.formaPago === 'TARJETA' || cuerpo.pago.formaPago === 'EFECTIVO');
+
 const leerMensajeError = (cuerpo: unknown): string | undefined =>
-  typeof cuerpo === 'object' && cuerpo !== null && 'error' in cuerpo && typeof cuerpo.error === 'string'
+  typeof cuerpo === 'object' &&
+  cuerpo !== null &&
+  'error' in cuerpo &&
+  typeof cuerpo.error === 'string'
     ? cuerpo.error
     : undefined;
 
@@ -74,7 +99,6 @@ export const useCompra = () => {
   const ahora = new Date();
   const [etapa, setEtapa] = useState<Etapa>('formulario');
   const [paso, setPaso] = useState<PasoCompra>('fecha');
-  const [pasoMaximo, setPasoMaximo] = useState(0);
   const [fecha, setFecha] = useState<Date>();
   const [visitantes, setVisitantes] = useState<VisitanteFormulario[]>(() => [nuevoVisitante()]);
   const [formaPago, setFormaPago] = useState<FormaPago>();
@@ -99,25 +123,29 @@ export const useCompra = () => {
   const precioPorId = new Map(completos.map((c, i) => [c.id, detalle.subtotales[i].precio]));
   const subtotales = visitantes.map((v) => ({ id: v.id, precio: precioPorId.get(v.id) }));
   const total = detalle.total;
-  const visitantesCompletos = completos.length === visitantes.length;
+  const estanCompletos = completos.length === visitantes.length;
 
   const errorPago = formaPago ? undefined : 'Elegí cómo vas a pagar.';
 
   const pasoValido: Record<PasoCompra, boolean> = {
     fecha: !errorFecha,
-    visitantes: visitantesCompletos,
+    visitantes: estanCompletos,
     pago: !errorPago,
   };
 
-  const irAPaso = (destino: PasoCompra) => {
-    if (PASOS.indexOf(destino) <= pasoMaximo) {
-      setErrorEnvio(undefined);
-      setPaso(destino);
-    }
+  // Solo se vuelve con «Anterior»: lo cargado en el paso que se abandona se descarta.
+  const retroceder = () => {
+    const actual = PASOS.indexOf(paso);
+    if (actual === 0) return;
+    if (paso === 'visitantes') setVisitantes([nuevoVisitante()]);
+    if (paso === 'pago') setFormaPago(undefined);
+    setIntentoAvanzar((previo) => ({ ...previo, [paso]: false }));
+    setErrorEnvio(undefined);
+    setPaso(PASOS[actual - 1]);
   };
 
   const confirmar = async () => {
-    if (!fecha || !formaPago || !visitantesCompletos) return;
+    if (!fecha || !formaPago || !estanCompletos) return;
     const solicitud: SolicitudCompraHttp = {
       email: USUARIO_SESION.email,
       fechaVisita: aFechaIso(fecha),
@@ -129,15 +157,15 @@ export const useCompra = () => {
     setErrorEnvio(undefined);
     try {
       const { estado, cuerpo } = await postJson(URL_COMPRAS, solicitud);
-      const exito = estado >= 200 && estado < 300;
-      if (exito) {
-        const compra = cuerpo as ResultadoCompraHttp;
-        setResultado(compra);
-        setEtapa(compra.pago.formaPago === 'TARJETA' ? 'mercado-pago' : 'resultado');
+      const esExitosa = estado >= 200 && estado < 300;
+      if (esExitosa && esResultadoCompra(cuerpo)) {
+        setResultado(cuerpo);
+        setEtapa(cuerpo.pago.formaPago === 'TARJETA' ? 'mercado-pago' : 'resultado');
       } else {
         // El backend siempre responde `{ error }` con su mensaje; sin él no hay API (p. ej. el sitio estático).
         setErrorEnvio(
-          leerMensajeError(cuerpo) ?? 'El servicio de compras no está disponible en este momento. Probá más tarde.',
+          leerMensajeError(cuerpo) ??
+            'El servicio de compras no está disponible en este momento. Probá más tarde.',
         );
       }
     } catch (error) {
@@ -154,9 +182,7 @@ export const useCompra = () => {
       void confirmar();
       return;
     }
-    const siguiente = PASOS.indexOf(paso) + 1;
-    setPasoMaximo((maximo) => Math.max(maximo, siguiente));
-    setPaso(PASOS[siguiente]);
+    setPaso(PASOS[PASOS.indexOf(paso) + 1]);
   };
 
   const agregarVisitante = () => setVisitantes((lista) => [...lista, nuevoVisitante()]);
@@ -175,7 +201,6 @@ export const useCompra = () => {
   const volverAEmpezar = () => {
     setEtapa('formulario');
     setPaso('fecha');
-    setPasoMaximo(0);
     setFecha(undefined);
     setVisitantes([nuevoVisitante()]);
     setFormaPago(undefined);
@@ -189,9 +214,8 @@ export const useCompra = () => {
     etapa,
     setEtapa,
     paso,
-    pasoMaximo,
-    irAPaso,
     continuar,
+    retroceder,
     fecha,
     setFecha,
     errorFecha: intentoAvanzar.fecha ? errorFecha : undefined,

@@ -1,4 +1,5 @@
-import { ChevronUp, LoaderCircle } from 'lucide-react';
+import { ChevronLeft, ChevronUp, LoaderCircle } from 'lucide-react';
+import { PASOS } from '../useCompra';
 import { useState, type ReactNode } from 'react';
 import { Boton } from '../../../shared/ui/Boton';
 import { formatearFecha, formatearPesos, formatearTotal } from '../../../shared/ui/formato';
@@ -11,7 +12,10 @@ const ACCION: Record<EstadoCompra['paso'], string> = {
 };
 
 const NOMBRE_PASE = { REGULAR: 'Regular', VIP: 'VIP' } as const;
-const NOMBRE_FORMA_PAGO = { TARJETA: 'Tarjeta (Mercado Pago)', EFECTIVO: 'Efectivo en boletería' } as const;
+const NOMBRE_FORMA_PAGO = {
+  TARJETA: 'Tarjeta (Mercado Pago)',
+  EFECTIVO: 'Efectivo en boletería',
+} as const;
 
 /**
  * La ficha de visita: el resumen que se completa a medida que se elige.
@@ -20,7 +24,8 @@ const NOMBRE_FORMA_PAGO = { TARJETA: 'Tarjeta (Mercado Pago)', EFECTIVO: 'Efecti
 export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
   const [abierta, setAbierta] = useState(false);
   const cantidad = compra.visitantes.length;
-  const enPasoVisitantesOMas = compra.pasoMaximo >= 1;
+  const enPasoVisitantesOMas = PASOS.indexOf(compra.paso) >= 1;
+  const puedeVolver = compra.paso !== 'fecha';
 
   return (
     <aside
@@ -37,10 +42,13 @@ export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
             onClick={() => setAbierta((a) => !a)}
             aria-expanded={abierta}
             aria-controls="detalle-ficha"
-            className="-mr-2 ml-auto flex h-9 items-center gap-1 rounded-md px-2 text-sm font-bold text-primario hover:bg-fondo lg:hidden"
+            className="-mr-2 -my-1 ml-auto flex h-11 items-center gap-1 rounded-md px-2 text-sm font-bold text-primario hover:bg-fondo lg:hidden"
           >
             {abierta ? 'Ocultar detalle' : 'Ver detalle'}
-            <ChevronUp aria-hidden className={`size-4 transition-transform duration-200 ${abierta ? '' : 'rotate-180'}`} />
+            <ChevronUp
+              aria-hidden
+              className={`size-4 transition-transform duration-200 ${abierta ? '' : 'rotate-180'}`}
+            />
           </button>
         </div>
 
@@ -48,7 +56,9 @@ export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
           id="detalle-ficha"
           className={`${abierta ? 'block' : 'hidden'} mt-1 max-h-[42vh] overflow-y-auto text-[15px] lg:block lg:max-h-none`}
         >
-          <Renglon termino="Fecha">{compra.fecha ? formatearFecha(compra.fecha, 'media') : <Pendiente />}</Renglon>
+          <Renglon termino="Fecha">
+            {compra.fecha ? formatearFecha(compra.fecha, 'media') : <Pendiente />}
+          </Renglon>
           {enPasoVisitantesOMas ? (
             compra.visitantes.map((v, i) => {
               const edad = leerEdad(v.edad);
@@ -69,7 +79,9 @@ export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
               <Pendiente />
             </Renglon>
           )}
-          <Renglon termino="Pago">{compra.formaPago ? NOMBRE_FORMA_PAGO[compra.formaPago] : <Pendiente />}</Renglon>
+          <Renglon termino="Pago">
+            {compra.formaPago ? NOMBRE_FORMA_PAGO[compra.formaPago] : <Pendiente />}
+          </Renglon>
         </dl>
 
         {/* Versión plegada (celular): dos renglones de la etiqueta y, al lado, el total. */}
@@ -84,7 +96,10 @@ export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
           </dl>
           <p className="pb-1.5 text-right">
             <span className="block text-[13px] font-bold">Total</span>
-            <span className="block text-[26px] font-bold leading-none text-primario cifras">
+            <span
+              className="block text-[26px] font-bold leading-none text-primario cifras"
+              aria-live="polite"
+            >
               {formatearTotal(compra.total)}
             </span>
           </p>
@@ -94,21 +109,44 @@ export const FichaVisita = ({ compra }: { compra: EstadoCompra }) => {
           className={`${abierta ? 'flex' : 'hidden'} mb-3 mt-2 items-baseline justify-between border-t border-renglon pt-2.5 lg:mt-3 lg:flex`}
         >
           <span className="text-[15px] font-bold">Total</span>
-          <span className="text-[26px] font-bold leading-none text-primario cifras" aria-live="polite">
+          <span
+            className="text-[26px] font-bold leading-none text-primario cifras"
+            aria-live="polite"
+          >
             {formatearTotal(compra.total)}
           </span>
         </div>
 
-        <Boton ancho onClick={compra.continuar} disabled={compra.enviando} aria-describedby={compra.errorEnvio ? 'error-envio' : undefined}>
-          {compra.enviando ? (
-            <>
-              <LoaderCircle aria-hidden className="size-5 animate-spin" />
-              Confirmando…
-            </>
-          ) : (
-            ACCION[compra.paso]
+        {/* En el celular van en fila; en la columna lateral, apilados para que «Continuar» use todo el ancho. */}
+        <div className="flex gap-3 lg:flex-col-reverse">
+          {puedeVolver && (
+            <Boton
+              variante="secundario"
+              className="h-13 shrink-0 px-3.5 lg:h-12 lg:w-full"
+              onClick={compra.retroceder}
+              disabled={compra.enviando}
+            >
+              <ChevronLeft aria-hidden className="-ml-1 size-5" />
+              Anterior
+            </Boton>
           )}
-        </Boton>
+          <Boton
+            ancho
+            className="min-w-0 px-4"
+            onClick={compra.continuar}
+            disabled={compra.enviando}
+            aria-describedby={compra.errorEnvio ? 'error-envio' : undefined}
+          >
+            {compra.enviando ? (
+              <>
+                <LoaderCircle aria-hidden className="size-5 animate-spin" />
+                Confirmando…
+              </>
+            ) : (
+              ACCION[compra.paso]
+            )}
+          </Boton>
+        </div>
       </div>
     </aside>
   );

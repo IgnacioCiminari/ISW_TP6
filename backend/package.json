@@ -7,10 +7,17 @@
     "start": "tsx src/main.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint -c ../.oxlintrc.json --deny-warnings src test",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"*.ts\"",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^5.0.5",
+    "oxlint": "^1.89.0",
+    "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
