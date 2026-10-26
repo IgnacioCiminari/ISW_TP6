@@ -60,6 +60,12 @@ export interface MensajeMail {
   adjuntos: AdjuntoMail[];
 }
 
+// Puerto hacia el servidor de mail: en los tests se reemplaza por un fake,
+// en producción se implementa con SMTP.
+export interface TransporteMail {
+  enviar(mensaje: MensajeMail): Promise<void>;
+}
+
 // Colaboradores inyectados por constructor. Se agregan a medida que los tests los piden.
 export interface DependenciasCompras {
   usuarios: {
