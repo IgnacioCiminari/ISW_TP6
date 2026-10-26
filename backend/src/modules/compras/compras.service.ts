@@ -1,14 +1,13 @@
-import type { FormaPago, ResultadoPago, Visitante } from '../pagos/pagos.types';
+import type { FormaPago, ResultadoPago, Subtotal, Visitante } from '../pagos/pagos.types';
 import type {
   DependenciasCompras,
+  EntradaConfirmada,
   NuevaCompra,
   ResultadoCompra,
   ResumenCompra,
   SolicitudCompra,
 } from './compras.types';
-import { MAX_ENTRADAS } from './compras.constants';
-
-const PREFIJO_QR = 'QR-';
+import { MAX_ENTRADAS, PREFIJO_QR } from './compras.constants';
 
 export class ComprasService {
   constructor(private readonly deps: DependenciasCompras) {}
@@ -33,7 +32,7 @@ export class ComprasService {
       cantidadEntradas: cantidad,
       formaPago,
       detalle,
-      codigoQR: this.generarCodigoQR(numeroOrden),
+      entradas: this.confirmarEntradas(numeroOrden, detalle.subtotales),
     });
 
     return {
@@ -119,7 +118,14 @@ export class ComprasService {
     return this.deps.notificador.enviarConfirmacion(email, resumen);
   }
 
-  private generarCodigoQR(numeroOrden: string): string {
-    return `${PREFIJO_QR}${numeroOrden}`;
+  private confirmarEntradas(numeroOrden: string, subtotales: Subtotal[]): EntradaConfirmada[] {
+    return subtotales.map((subtotal, indice) => ({
+      ...subtotal,
+      codigoQR: this.generarCodigoQR(numeroOrden, indice + 1),
+    }));
+  }
+
+  private generarCodigoQR(numeroOrden: string, numeroEntrada: number): string {
+    return `${PREFIJO_QR}${numeroOrden}-${numeroEntrada}`;
   }
 }

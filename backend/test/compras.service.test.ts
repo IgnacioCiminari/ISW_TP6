@@ -136,7 +136,7 @@ describe('ComprasService.comprarEntradas', () => {
       );
     });
 
-    it('el mail de confirmación incluye un código QR de acceso', async () => {
+    it('el mail de confirmación incluye un código QR por entrada', async () => {
       const deps = crearDependencias();
       const servicio = new ComprasService(deps);
 
@@ -144,8 +144,22 @@ describe('ComprasService.comprarEntradas', () => {
 
       expect(deps.notificador.enviarConfirmacion).toHaveBeenCalledOnce();
       const [, resumen] = deps.notificador.enviarConfirmacion.mock.calls[0]!;
-      expect(resumen.codigoQR).toEqual(expect.any(String));
-      expect(resumen.codigoQR.length).toBeGreaterThan(0);
+      expect(resumen.entradas).toEqual([
+        { edad: 35, tipoPase: 'VIP', precio: 20000, codigoQR: expect.any(String) },
+        { edad: 10, tipoPase: 'REGULAR', precio: 5000, codigoQR: expect.any(String) },
+      ]);
+    });
+
+    it('cada entrada tiene un código QR distinto que referencia la orden', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
+
+      await servicio.comprarEntradas(solicitudValida());
+
+      const [, resumen] = deps.notificador.enviarConfirmacion.mock.calls[0]!;
+      const codigos = resumen.entradas.map((entrada) => entrada.codigoQR);
+      expect(new Set(codigos).size).toBe(codigos.length);
+      for (const codigo of codigos) expect(codigo).toContain('ORD-0001');
     });
 
     it('valida la fecha de visita contra las reglas del parque', async () => {
