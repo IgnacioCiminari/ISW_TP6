@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Server } from 'node:http';
 import type { ComprasService } from '../../../src/modules/compras/compras.service';
 import type { ResultadoCompra, SolicitudCompra } from '../../../src/modules/compras/compras.types';
@@ -97,8 +97,10 @@ describe('CompraController', () => {
     expect(respuesta.status).toBe(422);
   });
 
-  it('oculta errores inesperados con 500', async () => {
-    const sistema = await iniciar(new ComprasServiceFalso(new Error('fallo de infraestructura')));
+  it('oculta errores inesperados con 500 y los registra en la consola', async () => {
+    const error = new Error('fallo de infraestructura');
+    const consola = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const sistema = await iniciar(new ComprasServiceFalso(error));
     servidor = sistema.servidor;
 
     const respuesta = await fetch(sistema.url, {
@@ -109,5 +111,7 @@ describe('CompraController', () => {
 
     expect(respuesta.status).toBe(500);
     await expect(respuesta.json()).resolves.toEqual({ error: 'Error interno.' });
+    expect(consola).toHaveBeenCalledWith(expect.any(String), error);
+    consola.mockRestore();
   });
 });
