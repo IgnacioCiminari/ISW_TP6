@@ -49,6 +49,7 @@ describe('CompraController', () => {
   let servidor: Server | undefined;
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     if (servidor?.listening)
       await new Promise<void>((resolve, reject) =>
         servidor?.close((error) => (error ? reject(error) : resolve())),
@@ -112,6 +113,5 @@ describe('CompraController', () => {
     expect(respuesta.status).toBe(500);
     await expect(respuesta.json()).resolves.toEqual({ error: 'Error interno.' });
     expect(consola).toHaveBeenCalledWith(expect.any(String), error);
-    consola.mockRestore();
   });
 });

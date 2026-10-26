@@ -47,7 +47,7 @@ const describirEntrada = (entrada: EntradaConfirmada): string[] => [
   entrada.codigoQR,
 ];
 
-const cidDelQR = (indice: number): string => `qr-${indice + 1}@ecoharmonypark`;
+const armarCidQR = (indice: number): string => `qr-${indice + 1}@ecoharmonypark`;
 
 const armarTexto = (resumen: ResumenCompra): string =>
   [
@@ -81,19 +81,19 @@ const COLOR = {
 const FUENTE = "Lato, 'Helvetica Neue', Arial, sans-serif";
 const TAMANIO_QR = 160;
 
-const filaDato = (etiqueta: string, valor: string): string => `
+const armarFilaDato = (etiqueta: string, valor: string): string => `
 <tr>
   <td style="padding:8px 0;border-bottom:1px solid ${COLOR.renglon};color:${COLOR.tintaSuave};font-size:14px">${etiqueta}</td>
   <td style="padding:8px 0;border-bottom:1px solid ${COLOR.renglon};color:${COLOR.tinta};font-size:14px;font-weight:700;text-align:right">${valor}</td>
 </tr>`;
 
-const bloqueEntrada = (entrada: EntradaConfirmada, indice: number): string => {
+const armarBloqueEntrada = (entrada: EntradaConfirmada, indice: number): string => {
   const [edad, pase, precio, codigo] = describirEntrada(entrada);
   return `
 <tr>
   <td style="padding:16px 0;border-bottom:1px solid ${COLOR.renglon};text-align:center">
     <p style="margin:0;color:${COLOR.tinta};font-size:15px"><strong>Entrada ${indice + 1}</strong> · ${edad} · ${pase} · ${precio}</p>
-    <img src="cid:${cidDelQR(indice)}" alt="QR ${codigo}" width="${TAMANIO_QR}" height="${TAMANIO_QR}" style="display:block;margin:12px auto 4px">
+    <img src="cid:${armarCidQR(indice)}" alt="QR ${codigo}" width="${TAMANIO_QR}" height="${TAMANIO_QR}" style="display:block;margin:12px auto 4px">
     <p style="margin:0;color:${COLOR.tintaSuave};font-size:12px">${codigo}</p>
   </td>
 </tr>`;
@@ -113,13 +113,13 @@ const armarHtml = (resumen: ResumenCompra): string => `
         <tr>
           <td style="padding:16px 24px">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-              ${filaDato('Orden', resumen.numeroOrden)}
-              ${filaDato('Fecha de visita', formatearFecha(resumen.fechaVisita))}
-              ${filaDato('Forma de pago', DESCRIPCION_PAGO[resumen.formaPago])}
+              ${armarFilaDato('Orden', resumen.numeroOrden)}
+              ${armarFilaDato('Fecha de visita', formatearFecha(resumen.fechaVisita))}
+              ${armarFilaDato('Forma de pago', DESCRIPCION_PAGO[resumen.formaPago])}
             </table>
             <h2 style="margin:24px 0 0;color:${COLOR.primario};font-size:17px">Tus entradas</h2>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-              ${resumen.entradas.map(bloqueEntrada).join('')}
+              ${resumen.entradas.map(armarBloqueEntrada).join('')}
               <tr>
                 <td style="padding:16px 0 0;color:${COLOR.primario};font-size:18px;font-weight:700;text-align:right">Total ${FORMATO_PESOS.format(resumen.detalle.total)}</td>
               </tr>
@@ -136,9 +136,10 @@ const armarAdjuntos = (entradas: EntradaConfirmada[], imagenesQR: Buffer[]): Adj
   entradas.map((entrada, indice) => ({
     nombre: `${entrada.codigoQR}.png`,
     contenido: imagenesQR[indice],
-    cid: cidDelQR(indice),
+    cid: armarCidQR(indice),
   }));
 
+/** Mail de confirmación de la compra (FAQ 18), con un QR embebido por entrada. */
 export const armarMailConfirmacion = ({
   remitente,
   para,

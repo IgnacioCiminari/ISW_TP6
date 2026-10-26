@@ -123,8 +123,8 @@ describe('POST /api/compras integrado', () => {
     const cuerpo = (await respuesta.json()) as { numeroOrden: string };
 
     expect(respuesta.status).toBe(201);
-    expect(transporte.enviados).toHaveLength(1);
-    const [mail] = transporte.enviados;
+    expect(transporte.llamadas).toHaveLength(1);
+    const [mail] = transporte.llamadas;
     expect(mail!.para).toBe('visitante@mail.com');
     expect(mail!.asunto).toContain(cuerpo.numeroOrden);
     expect(mail!.adjuntos.map((adjunto) => leerQR(adjunto.contenido))).toEqual([

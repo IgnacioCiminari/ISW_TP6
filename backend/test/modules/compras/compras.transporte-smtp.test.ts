@@ -15,13 +15,13 @@ const MENSAJE: MensajeMail = {
 };
 
 // jsonTransport arma el mail igual que SMTP pero lo devuelve como JSON en vez de enviarlo.
-const enviarSinRed = async (mensaje: MensajeMail) => {
+const enviarSinRed = async (mensaje: MensajeMail): Promise<Record<string, unknown>> => {
   const transportador = nodemailer.createTransport({ jsonTransport: true });
   const sendMail = vi.spyOn(transportador, 'sendMail');
 
   await new TransporteSmtp(transportador).enviar(mensaje);
 
-  const info = (await sendMail.mock.results[0]!.value) as { message: string };
+  const info: { message: string } = await sendMail.mock.results[0]!.value;
   return JSON.parse(info.message);
 };
 

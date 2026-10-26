@@ -33,8 +33,8 @@ describe('NotificadorMail', () => {
 
       await notificador.enviarConfirmacion(EMAIL, RESUMEN);
 
-      expect(transporte.enviados).toHaveLength(1);
-      expect(transporte.enviados[0]).toMatchObject({
+      expect(transporte.llamadas).toHaveLength(1);
+      expect(transporte.llamadas[0]).toMatchObject({
         de: REMITENTE,
         para: EMAIL,
         asunto: expect.stringContaining('ORD-123'),
@@ -47,7 +47,7 @@ describe('NotificadorMail', () => {
 
       await notificador.enviarConfirmacion(EMAIL, RESUMEN);
 
-      const adjuntos = transporte.enviados[0]!.adjuntos;
+      const adjuntos = transporte.llamadas[0]!.adjuntos;
       expect(adjuntos.map((adjunto) => leerQR(adjunto.contenido))).toEqual([
         'QR-ORD-123-1',
         'QR-ORD-123-2',

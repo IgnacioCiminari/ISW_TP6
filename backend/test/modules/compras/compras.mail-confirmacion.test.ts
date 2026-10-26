@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { armarMailConfirmacion } from '../../../src/modules/compras/compras.mail-confirmacion';
 import type { MensajeMail } from '../../../src/modules/compras/compras.mail.types';
 import type { ResumenCompra } from '../../../src/modules/compras/compras.types';
+import type { FormaPago } from '../../../src/modules/pagos/pagos.types';
 
 const REMITENTE = 'EcoHarmony Park <ecoharmonypark1@gmail.com>';
 const EMAIL = 'visitante@mail.com';
@@ -78,10 +79,10 @@ describe('armarMailConfirmacion', () => {
     for (const cuerpo of cuerpos(mail)) expect(cuerpo).toMatch(/Total.*\$\s?25\.000/s);
   });
 
-  it.each([
+  it.each<[FormaPago, string]>([
     ['TARJETA', 'Mercado Pago'],
     ['EFECTIVO', 'boletería'],
-  ] as const)('con pago %s lo indica como %s', (formaPago, textoEsperado) => {
+  ])('con pago %s lo indica como %s', (formaPago, textoEsperado) => {
     const mail = armar({ ...RESUMEN, formaPago });
 
     for (const cuerpo of cuerpos(mail)) expect(cuerpo).toContain(textoEsperado);
