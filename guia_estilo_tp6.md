@@ -1,7 +1,7 @@
 # Guía de Estilo del Proyecto — EcoHarmony Park
 
 **Proyecto:** TP6 — Ingeniería y Calidad de Software (ISW) · Grupo 1 · 4K1 · 2026
-**Stack:** Node.js + TypeScript (backend, `node:http` + `node:sqlite`) · React 19 + Vite + Tailwind CSS v4 (frontend) · Vitest
+**Stack:** Node.js + TypeScript (backend, `node:http` + `node:sqlite`; mail con `nodemailer` + `qrcode`) · React 19 + Vite + Tailwind CSS v4 (frontend) · Vitest
 
 > Esta guía describe **cómo está escrito el código hoy**. Cada regla sale de lo que ya hace la
 > mayoría del repositorio, con ejemplos tomados de los archivos reales.
@@ -34,8 +34,10 @@
   tipos del backend por el alias `@backend/*`; nunca los copia.
 - **Dominio en español, técnica en inglés.** Por ejemplo `ComprasService`, `SqliteUsuariosRepository`,
   `CompraPage`, `compras.types.ts`.
-- **Inyección de dependencias.** Los servicios reciben sus colaboradores por constructor. Las
-  instancias se crean en un único lugar: [aplicacion.ts](backend/src/aplicacion.ts).
+- **Inyección de dependencias.** Los servicios reciben sus colaboradores por constructor. Los
+  servicios y repositorios se crean en un único lugar, [aplicacion.ts](backend/src/aplicacion.ts);
+  los adaptadores externos (pasarela y notificador) se eligen en [main.ts](backend/src/main.ts)
+  según la configuración y se le pasan a `crearAplicacion`.
 - **Responsabilidad única.** Un método público orquesta y delega en métodos privados con nombre de
   acción (`validarSolicitud`, `registrarCompra`, `iniciarPago`, `notificarCompra`).
 - **Tipado estricto.** `"strict": true` en los dos `tsconfig.json` y ningún `any`.
@@ -44,128 +46,21 @@
 
 ## 2. Formato y Sangría
 
-### Sangría
+El formato lo decide **Prettier**, con [.prettierrc.json](.prettierrc.json), que comparten backend y
+frontend. Si `npm run format:check` pasa, el formato cumple la guía; no se revisa a mano.
 
-Se usan **2 espacios** por nivel, sin tabulaciones.
+| Opción | Valor |
+|---|---|
+| Sangría | 2 espacios, sin tabulaciones |
+| Ancho de línea | 100 caracteres |
+| Punto y coma | Siempre |
+| Comillas | Simples (`'`); dobles en los atributos JSX |
+| Coma final | En todo lo que ocupa varias líneas |
 
-```ts
-// ✅ Correcto (pagos.service.ts)
-async procesarPago(
-  numeroOrden: string,
-  total: number,
-  formaPago: FormaPago,
-): Promise<ResultadoPago> {
-  if (formaPago === 'EFECTIVO') {
-    return {
-      formaPago,
-      estado: 'PENDIENTE_EN_BOLETERIA',
-    };
-  }
-  ...
-}
-
-// ❌ Incorrecto (4 espacios)
-estaAbierto(fecha: Date): boolean {
-    const esLunes = fecha.getDay() === 1;
-    return !esLunes && !this.esFeriado(fecha);
-}
-```
-
-### Longitud de línea
-
-- **TypeScript (`.ts`):** como máximo **100 caracteres**. Si una firma o una llamada no entra, se
-  parte un argumento por línea, con coma final.
-- **JSX (`.tsx`):** el límite de 100 se respeta en la lógica. Se toleran líneas más largas en el
-  atributo `className`, porque así se lee el conjunto de clases de Tailwind de un elemento en un solo
-  bloque.
-
-```ts
-// ✅ Correcto
-const crearDependencias = () => ({
-  compras: {
-    contarEntradas: vi.fn<(email: string, fecha: Date) => Promise<number>>().mockResolvedValue(0),
-    guardar: vi.fn<(compra: NuevaCompra) => Promise<string>>().mockResolvedValue('ORD-0001'),
-  },
-});
-```
-
-### Punto y coma
-
-Todas las sentencias **terminan en punto y coma**.
-
-```ts
-// ✅ Correcto
-const MAX_ENTRADAS = 10;
-throw new Error('No se pueden comprar más de 10 entradas.');
-
-// ❌ Incorrecto
-throw new Error('No se pueden comprar más de 10 entradas.')
-```
-
-### Comillas
-
-- Para los strings se usan **comillas simples** `'`.
-- Para interpolar se usan **template literals** `` ` ``.
-- En los atributos JSX se usan comillas dobles: `className="..."`.
-- Las comillas dobles también se usan dentro de un string que ya lleva comillas simples:
-  `"SELECT name FROM sqlite_master WHERE type = 'table'"`.
-
-```ts
-const PREFIJO_QR = 'QR-';
-return `${PREFIJO_QR}${numeroOrden}`;
-```
-
-### Coma final
-
-En objetos, arrays, parámetros y argumentos que ocupan varias líneas, el último elemento lleva
-**coma final**.
-
-### Líneas en blanco
-
-- Va **una línea en blanco** entre bloques lógicos de una función, en especial entre las partes
-  Arrange, Act y Assert de un test.
-- Va **una línea en blanco** entre métodos de una clase y entre funciones exportadas.
-- **No se dejan** líneas en blanco al principio ni al final de un bloque `{}`, ni espacios al final
-  de una línea.
-- **Nunca hay dos líneas en blanco seguidas.**
-
-### Espacios en expresiones
-
-- **Un espacio** antes y después de los operadores (`=`, `===`, `+`, `&&`, `=>`).
-- **Un espacio** después de cada coma.
-- **Un espacio** entre una palabra clave y su paréntesis (`if (`, `for (`, `catch (`), y entre `)`
-  y `{`.
-- **Sin espacios** inmediatamente dentro de `( )` y `[ ]`. Las llaves de un objeto en una sola
-  línea llevan un espacio adentro: `{ fechaVisita: fechaLunes }`.
-- `catch` y `else` van en la misma línea que la `}` que cierra el bloque anterior.
-
-```ts
-// ✅ Correcto
-const { email, fechaVisita } = solicitud;
-const comprasAnteriores = await this.deps.compras.contarEntradas(email, fechaVisita);
-if (comprasAnteriores + solicitud.cantidad > MAX_ENTRADAS) {
-  ...
-}
-try {
-  ...
-} catch {
-  throw new Error('No se pudo iniciar el pago con Mercado Pago.');
-}
-
-// ❌ Incorrecto
-contarEntradas(solicitud.email,solicitud.fechaVisita);
-if (( comprasAnteriores + solicitud.cantidad) > MAX_ENTRADAS) {
-if (solicitud.cantidad === 0){
-}
-catch(error){
-```
-
-### Fin de archivo
-
-Todo archivo termina con **un salto de línea**.
-
-En el repositorio los archivos se guardan con **LF**. En Windows, con `core.autocrlf=true`, Git los
-convierte a CRLF en la copia local; eso es normal y no cuenta como desvío.
+- Prettier no parte strings, template literals ni comentarios. Esas líneas pueden pasar de 100
+  caracteres y no cuentan como desvío.
+- En el repositorio los archivos se guardan con **LF**. En Windows, con `core.autocrlf=true`, Git
+  los convierte a CRLF en la copia local; eso es normal y no cuenta como desvío.
 
 ---
 
@@ -175,19 +70,22 @@ convierte a CRLF en la copia local; eso es normal y no cuenta como desvío.
 |---|---|---|
 | Archivos de módulo del backend | `<modulo>.<rol>.ts` | `compras.service.ts`, `pagos.types.ts`, `pagos.constants.ts`, `compras.repository.ts`, `compras.controller.ts` |
 | Adaptadores simulados | `<modulo>.<adaptador>-simulado.ts` | `pagos.pasarela-simulada.ts`, `compras.notificador-simulado.ts` |
+| Adaptadores reales | `<modulo>.<adaptador>-<tecnología>.ts` | `compras.notificador-mail.ts`, `compras.transporte-smtp.ts` |
+| Tipos que solo usa el servidor | `<modulo>.<tema>.types.ts` | `compras.mail.types.ts` (usa `Buffer`; el frontend no lo puede importar) |
 | Infraestructura y arranque | `kebab-case.ts` | `servidor-http.ts`, `conexion-sqlite.ts`, `esquema-sqlite.ts`, `aplicacion.ts`, `main.ts` |
-| Configuración | `<tema>.config.ts` | `base-datos.config.ts`, `servidor.config.ts` |
+| Configuración | `<tema>.config.ts` | `base-datos.config.ts`, `servidor.config.ts`, `mail.config.ts` |
 | Componentes React | `PascalCase.tsx` | `FichaVisita.tsx`, `PantallaResultado.tsx` |
 | Páginas | `<Funcionalidad>Page.tsx` | `CompraPage.tsx` |
 | Hooks | `use<Funcionalidad>.ts` | `useCompra.ts` |
 | Utilidades del frontend | `camelCase.ts` | `formato.ts`, `cliente.ts`, `sesion.ts` |
 | Tests | `<archivo probado>.test.ts` | `compras.service.test.ts`, `compras.repository.test.ts` |
 | Tests de integración | `<modulo>[.<capa>].integracion.test.ts` | `compras.integracion.test.ts`, `compras.http.integracion.test.ts` |
-| Fakes de test | `<puerto>.falso.ts` | `notificador.falso.ts`, `pasarela-pago.falsa.ts` |
+| Fakes de test | `<puerto>.falso.ts` | `notificador.falso.ts`, `pasarela-pago.falsa.ts`, `transporte-mail.falso.ts` |
+| Helpers de test | `kebab-case.ts` en `test/helpers/` | `leer-qr.ts` |
 | Servicios | `<Modulo>Service` | `ComprasService`, `PagosService`, `ParqueService` |
 | Repositorios | `Sqlite<Modulo>Repository` | `SqliteComprasRepository` |
 | Controladores | `<Entidad>Controller` | `CompraController` |
-| Adaptadores y fakes (clases) | `<Puerto>Simulada/o`, `<Puerto>Falsa/o` | `PasarelaPagoSimulada`, `NotificadorFalso` |
+| Adaptadores y fakes (clases) | `<Puerto>Simulada/o`, `<Puerto><Tecnología>`, `<Puerto>Falsa/o` | `PasarelaPagoSimulada`, `NotificadorMail`, `TransporteSmtp`, `NotificadorFalso` |
 | Interfaces y tipos | `PascalCase`, **sin** prefijo `I` | `SolicitudCompra`, `PasarelaPago`, `ResultadoPago` |
 | Props de componentes | `<Componente>Props` | `GuiaPasosProps`, `BotonProps` |
 | Métodos y variables | `camelCase` | `validarFechaVisita`, `numeroOrden` |
@@ -203,11 +101,13 @@ El nombre empieza con un verbo en infinitivo que dice qué hace el método:
 |---|---|---|
 | `validar…` | Lanza un error si la regla no se cumple | `validarFechaVisita`, `validarVisitantes` |
 | `calcular…` | Hace un cálculo puro | `calcularPrecioEntrada`, `calcularDetalle` |
-| `procesar…` / `iniciar…` | Llama a un servicio externo | `procesarPago`, `iniciarPagoConMercadoPago` |
+| `procesar…` / `iniciar…` / `enviar…` | Llama a un servicio externo | `procesarPago`, `iniciarPagoConMercadoPago`, `enviarConfirmacion` |
 | `registrar…` / `guardar` / `contar…` | Persiste o consulta | `registrarCompra`, `guardar`, `contarEntradas` |
 | `leer…` | Interpreta una entrada no confiable o lee la configuración | `leerSolicitud`, `leerEdad`, `leerConfiguracionServidor` |
 | `crear…` | Fábrica | `crearAplicacion`, `crearServidor`, `crearDependencias` |
 | `formatear…` / `a…` | Hace una conversión de presentación | `formatearPesos`, `aFechaIso`, `aVisitante` |
+| `armar…` | Compone una estructura de salida a partir de datos | `armarMailConfirmacion`, `armarHtml`, `armarFilaDato` |
+| `generar…` | Produce un código o una imagen | `generarCodigoQR`, `generarImagenQR` |
 
 ### Booleanos
 
@@ -240,8 +140,6 @@ El nombre empieza con un verbo en infinitivo que dice qué hace el método:
 
 - Se usan **ES Modules** en todo el proyecto (`"type": "module"`).
 - Los imports que solo traen tipos usan **`import type`**.
-- **Orden:** primero las librerías externas (`react`, `lucide-react`, `node:*`) y después los módulos
-  del proyecto. No se exige una línea en blanco entre los grupos.
 - **Rutas:**
   - En el backend, las rutas son relativas y van sin extensión.
   - En el frontend, lo que viene del backend se importa con el alias `@backend/…` y lo propio con
@@ -286,7 +184,9 @@ export class ComprasService {
 ```
 
 Las clases no crean a sus colaboradores. El único lugar donde se hace `new` de servicios y
-repositorios es `crearAplicacion` ([aplicacion.ts](backend/src/aplicacion.ts)).
+repositorios es `crearAplicacion` ([aplicacion.ts](backend/src/aplicacion.ts)). Los adaptadores
+externos se arman en `main.ts`: `PasarelaPagoSimulada` y, si hay `SMTP_HOST`,
+`NotificadorMail` → `TransporteSmtp` → nodemailer; si no, `NotificadorSimulado`.
 
 ### Funciones sueltas
 
@@ -355,7 +255,9 @@ export type ResultadoPago =
   conversión se hace en los bordes:
   - en el controller, con `leerFechaLocal`;
   - en el frontend, con `aFechaIso`;
-  - en SQL, con `formatearFechaSql`.
+  - en SQL, con `formatearFechaSql`;
+  - en el mail, con `formatearFecha` de `compras.mail-confirmacion.ts`, que la arma en UTC a partir
+    de sus partes locales para que no se corra un día cuando el proceso corre en UTC (Docker).
 - **Fecha actual:**
   - `ParqueService.validarFechaVisita(fechaVisita, ahora)` recibe `ahora` como parámetro. Si no se
     pasa, toma `new Date()` por defecto.
@@ -365,15 +267,13 @@ export type ResultadoPago =
   zona del proceso. `ParqueService` lee el año, el mes, el día, la hora y el minuto de `ahora` con
   `Intl.DateTimeFormat` (`partesEnCordoba`). Por eso da igual que el back corra en UTC (Docker) o
   que el navegador esté en otra zona.
-- **Meses:** los de `Date` van de 0 a 11. Cuando aparecen como número, se aclara con un comentario:
-  `[11, 25], // [mes, dia], para el mes [0: enero, 1: febrero ...]`.
 
 ### Dinero
 
 - Los importes son **enteros en pesos argentinos (ARS)**.
 - En la base se guardan como columnas `INTEGER CHECK (... >= 0)`.
 - Los descuentos se aplican con `FACTOR_DESCUENTO_MEDIA_ENTRADA` sobre el precio del pase.
-- En el frontend se muestran con `Intl.NumberFormat('es-AR', { currency: 'ARS', maximumFractionDigits: 0 })`.
+- En el frontend y en el mail se muestran con `Intl.NumberFormat('es-AR', { currency: 'ARS', maximumFractionDigits: 0 })`.
   Una entrada de $0 se muestra como «Gratis»; el total se muestra siempre en pesos.
 
 ---
@@ -401,11 +301,17 @@ export type ResultadoPago =
   - Si es privada de una clase, va como `private static readonly` (`ParqueService.HORA_LIMITE`).
 - Las **tablas de lookup** también van en mayúsculas: `ACCION`, `NOMBRE_PASE`, `ESTILOS`, `PASES`,
   `DIAS_SEMANA`, `MENSAJES_DE_REGLA`.
-- **Los prefijos y formatos del dominio** también son constantes (`PREFIJO_QR = 'QR-'`). Esto
-  incluye el prefijo `ORD-` del número de orden, que no se repite como literal en otros archivos.
+- **Los prefijos del dominio** son constantes en `compras.constants.ts`, con un comentario que
+  muestra el formato completo: `PREFIJO_ORDEN = 'ORD-'` (`ORD-<uuid>`) y `PREFIJO_QR = 'QR-'`
+  (`QR-<numero de orden>-<n>`, un código por entrada).
 - **Configuración de ejecución:** está en un único objeto `configuracion` (`as const`) dentro de
   [config/configuracion.ts](backend/src/config/configuracion.ts) y se lee con
-  `leerConfiguracionBaseDatos()`, `leerConfiguracionServidor()` y `leerConfiguracionSimulacion()`.
+  `leerConfiguracionBaseDatos()`, `leerConfiguracionServidor()`, `leerConfiguracionSimulacion()` y
+  `leerConfiguracionMail()`.
+- **Valores de cada máquina** (credenciales SMTP, remitente, `EMAIL_DEMO`): se leen de
+  `process.env`. Vienen del `.env` de la raíz, que no se commitea; la plantilla versionada es
+  `.env.example`. `npm start` lo carga con `--env-file-if-exists` y Docker con `env_file`. Sin
+  `.env`, todo sigue funcionando con los valores por defecto y el mail simulado.
 - **No cuentan como números mágicos:**
   - los códigos HTTP (`201`, `400`, `422`, `500`);
   - los valores de Tailwind entre corchetes (`text-[15px]`);
@@ -441,12 +347,14 @@ export type ResultadoPago =
   |---|---|
   | Body que no se puede interpretar | `400 { error: 'Solicitud inválida.' }` |
   | Mensaje incluido en `MENSAJES_DE_REGLA` | `422 { error: <mensaje> }` |
-  | Cualquier otro error | `500 { error: 'Error interno.' }` |
+  | Cualquier otro error | `500 { error: 'Error interno.' }`, y el error se registra con `console.error` en el servidor |
   | Ruta inexistente | `404 { error: 'No encontrado.' }` |
 
   Si se agrega una regla nueva, su mensaje se suma a `MENSAJES_DE_REGLA` **en el mismo PR**.
 - **Fallas externas:** se envuelven en un mensaje de dominio, por ejemplo
-  `'No se pudo iniciar el pago con Mercado Pago.'`.
+  `'No se pudo iniciar el pago con Mercado Pago.'`. El envío del mail es la excepción: si el
+  SMTP falla, su error llega tal cual al controller, que responde 500 y lo deja en el log. La
+  compra ya quedó registrada.
 - Si el error no se usa, el `catch` va sin variable: `} catch {`.
 - **Transacciones:** se usa `BEGIN` / `COMMIT`, y en el `catch` se hace `ROLLBACK` y se vuelve a
   lanzar el error.
@@ -476,9 +384,6 @@ export type ResultadoPago =
   - `/** … */` en los helpers exportados y en las props de los componentes compartidos.
 - **Referencias:** se cita la fuente de la regla cuando corresponde, por ejemplo `FAQ 4`, `FAQ 5`,
   `FAQ 19` o `CONVENCIONES.md §1.1`.
-- **En los tests:** cada `new Date(…)` literal lleva al lado el día de la semana y la fecha legible:
-  `new Date(2026, 9, 26); // lunes 26/10/2026`. Con los helpers `fecha(…)` y `enCordoba(…)` de `parque.service.test.ts`
-  alcanza con que el día se lea en el nombre del test o en un comentario del bloque.
 - **Los comentarios tienen que coincidir con el código.** Un comentario que dice otra fecha u otro
   valor que el código es un error.
 - No se deja código comentado.
@@ -553,7 +458,8 @@ const Renglon = ({ termino, children }: { termino: string; children: ReactNode }
 - Para armar `className` con condiciones se usa un template literal o `[...].join(' ')`.
 - Todo `<button>` que no envía un formulario lleva `type="button"`. La variante estándar es el
   componente `<Boton>`.
-- Los íconos son solo de `lucide-react` y siempre llevan `aria-hidden`.
+- Los íconos son solo de `lucide-react`. Los decorativos se ocultan a los lectores de pantalla con
+  `aria-hidden`, puesto en el ícono o en el elemento que lo contiene.
 - La única fuente de estilos son las clases de Tailwind. Se acepta `style` solo dentro de un SVG
   (`Sello`).
 
@@ -565,8 +471,9 @@ const Renglon = ({ termino, children }: { termino: string; children: ReactNode }
   - Los inputs son nativos; los radios usan `sr-only` dentro de un `<label>` visual.
   - Los grupos van en `<fieldset>` con `<legend>` (puede ser `sr-only`).
   - Los botones sin texto llevan `aria-label` (`'Quitar visitante 2'`).
-- **Campos inválidos:** llevan `aria-invalid` y `aria-describedby`, que apunta al id del
-  `MensajeCampo`.
+- **Campos inválidos:** los inputs y los `radiogroup` llevan `aria-invalid` y `aria-describedby`,
+  que apunta al id del `MensajeCampo`. Los grupos compuestos con `role="group"`, como el
+  calendario, llevan solo `aria-describedby`, porque ARIA no admite `aria-invalid` en ese rol.
 - **Valores que cambian solos** (totales, mes del calendario): llevan `aria-live="polite"`.
 - **Modales:** se usa `<dialog>` nativo con `showModal()`.
 - **Tamaño táctil:** los objetivos miden 44px o más (`h-11`, `size-11` o más). En grillas densas,
@@ -579,13 +486,16 @@ const Renglon = ({ termino, children }: { termino: string; children: ReactNode }
   «¿Quiénes vienen?», «¿Cómo pagás?».
 - **Botones:** dicen la acción, por ejemplo «Continuar», «Continuar al pago», «Confirmar compra».
 
-### Simulaciones (FAQ 4 y 5)
+### Pago simulado y mail
 
 - **Pago con tarjeta:** pasa por `PantallaMercadoPago`, que espera `DEMORA_REDIRECCION_MS` y
   muestra «Compra exitosa».
 - **Pago en efectivo:** va directo a `PantallaResultado`.
-- **Mail:** `ModalMail` se abre al llegar al resultado y confirma la casilla del usuario de la sesión
-  simulada (`USUARIO_SESION`, FAQ 19).
+- **Mail:** lo envía el backend al confirmar la compra, con un QR por entrada. `ModalMail` se abre
+  al llegar al resultado y confirma la casilla del usuario de la sesión simulada (`USUARIO_SESION`).
+- **Usuario de la sesión:** `USUARIO_SESION.email` es `EMAIL_DEMO`, que `vite.config.ts` inyecta en
+  el build (`import.meta.env.EMAIL_DEMO`, tipado en `vite-env.d.ts`). Es el mismo usuario que el
+  backend registra al arrancar, así front y back no se desincronizan.
 
 ---
 
@@ -608,19 +518,23 @@ const Renglon = ({ termino, children }: { termino: string; children: ReactNode }
 | Token | Hex | Uso en el código |
 |---|---|---|
 | `primario` | `#386641` | Fondo del header, títulos (`h1`/`h2`), total, botón principal con texto blanco, borde de todo lo elegido, filete superior de las hojas, íconos informativos |
-| `secundario` | `#6a994e` | Hover y active del botón principal, borde del botón secundario, tilde de paso hecho, spinner, borde punteado del lugar del sello |
+| `secundario` | `#6a994e` | Hover y active del botón principal; borde del botón secundario y, con opacidad (`secundario/20`, `/30`), su hover y active; spinner; borde punteado del lugar del sello |
 | `acento` | `#a7c957` | Solo como relleno de selección (día, pase, forma de pago, `::selection`, disco del ícono del modal), siempre con borde `primario` o dentro de un contenedor con ese borde. El texto encima va en `tinta`. Nunca es color de texto |
-| `fondo` | `#f2e8cf` | Fondo de `body` y hover de filas y botones secundarios |
+| `fondo` | `#f2e8cf` | Fondo de `body` y hover de filas, opciones, días del calendario y botones sin borde |
 | `alerta` | `#bc4749` | Solo errores: `Alerta`, `MensajeCampo`, borde o `ring` de campos inválidos, hover del botón de quitar visitante |
 | `superficie` | `#ffffff` | Hojas, ficha, modal, fondo de los mensajes de error y texto sobre `primario` |
 | `renglon` | `#e3d8ba` | *Derivado.* Filetes de 1px entre filas y bordes de los días disponibles |
 | `tinta` | `#1f3a25` | *Derivado.* Texto de cuerpo |
 | `tinta-suave` | `#4b5a44` | *Derivado.* Texto secundario, etiquetas, términos de `<dt>`, días no disponibles (con opacidad) |
 
-Hay dos excepciones a "sin hex fuera de `@theme`":
+Hay tres excepciones a "sin hex fuera de `@theme`":
 - `<meta name="theme-color" content="#386641">` en `index.html`, porque ahí no se pueden usar
   variables CSS;
-- el fondo de `dialog::backdrop`, que usa `rgb()` con los valores de `tinta`.
+- el fondo de `dialog::backdrop`, que usa `rgb()` con los valores de `tinta`;
+- el HTML del mail de confirmación (`compras.mail-confirmacion.ts`). Los clientes de correo ignoran
+  `<style>`, las clases y las variables CSS, así que el mail repite la paleta en la constante
+  `COLOR`, usa estilos inline y se maqueta con tablas. Respeta los mismos usos de la tabla de
+  arriba y la escala tipográfica de abajo, con la fuente `Lato, 'Helvetica Neue', Arial, sans-serif`.
 
 ### Tipografía
 
@@ -645,18 +559,16 @@ Hay dos excepciones a "sin hex fuera de `@theme`":
   | 26px | `text-[26px]` | Título de paso, total y «Compra exitosa» |
   | 28px | `text-[28px]` | Título de resultado |
   | 30 / 36px | `lg:text-3xl` / `lg:text-4xl` | Títulos de paso y de resultado desde `lg` |
-- **Cifras:** todo importe, fecha numérica o contador lleva la utilidad `cifras` (números tabulares).
+- **Cifras:** los importes que se muestran sueltos (renglones, subtotales, totales) llevan la
+  utilidad `cifras` (números tabulares). Dentro de una oración no hace falta.
 
 ### Forma, movimiento y layout
 
 - **Bordes:** `rounded-md` para hojas, botones e inputs; `rounded-full` para círculos.
 - **Sombras:** solo en lo que flota, es decir la ficha fija en el celular y el modal.
-- **Transiciones:** `transition-colors duration-150` para cambios de color, y
-  `transition-transform duration-200` para giros (el chevron de «Ver detalle»).
-- **Animaciones:** hay dos, y las dos se desactivan con `prefers-reduced-motion`:
-  - el sello (`.sello`);
-  - el camino de la guía de pasos, que se pinta con `transition-transform duration-[900ms]`
-    (`scale-x-0` → `scale-x-100`) y sus bolas con `transition-colors duration-500`.
+- **Transiciones:** cortas, para cambios de color o el giro de un ícono. No hace falta desactivarlas.
+- **Animaciones:** lo que se desplaza por la pantalla (el sello y el camino de la guía de pasos) se
+  desactiva con `prefers-reduced-motion`.
 - **Mobile first:** las clases base son para el celular, y se amplía con `sm:` y `lg:`.
   - El contenedor estándar es `mx-auto max-w-xl px-4 lg:max-w-5xl`.
   - En el celular la ficha de visita queda fija al pie; desde `lg` pasa a una columna lateral.
@@ -685,8 +597,11 @@ Hay dos excepciones a "sin hex fuera de `@theme`":
   `test/infraestructura/bd/conexion-sqlite.test.ts`.
 - **Tests de integración:**
   - `test/compras.integracion.test.ts`: escenarios de usuario con los servicios reales;
-  - `test/modules/compras/compras.http.integracion.test.ts`: HTTP más SQLite en memoria.
+  - `test/modules/compras/compras.http.integracion.test.ts`: HTTP más SQLite en memoria. Uno de sus
+    tests usa el `NotificadorMail` real con `TransporteMailFalso` y decodifica los QR del mail.
 - **Fakes reutilizables:** van en `test/fakes/`. Registran sus llamadas en `llamadas: […]`.
+- **Helpers compartidos que no son fakes:** van en `test/helpers/`, como `leerQR`, que decodifica un
+  PNG con `jsqr` y `pngjs` para comprobar que un QR se puede leer.
 - El frontend no tiene tests.
 - **Cobertura:** `npm run test:coverage` mide los tres servicios y falla por debajo del 90 % de
   líneas.
@@ -699,12 +614,16 @@ Hay dos excepciones a "sin hex fuera de `@theme`":
 | Repositorios y conexión | SQLite real en memoria (`new ConexionSqlite(':memory:')`) |
 | Controller | Servicio falso con `implements Pick<ComprasService, 'comprarEntradas'>` y servidor real en el puerto `0` |
 | Integración | Servicios reales. Pasarela, notificador y repositorios falsos o en memoria |
+| `NotificadorMail` | `TransporteMailFalso`. Los QR y el armado del mail son reales |
+| `TransporteSmtp` | Transportador real de nodemailer con `jsonTransport`: arma el mail sin salir a la red |
+| Código que escribe en la consola | `vi.spyOn(console, 'error').mockImplementation(() => {})`, restaurado con `vi.restoreAllMocks()` en `afterEach` |
 
 ### Nombres
 
 - **`describe` en los tests de servicios:** primero la clase o la US y adentro el método, por
   ejemplo `describe('ParqueService')` y dentro `describe('validarFechaVisita')`. Todos los `describe`
-  del archivo cuelgan de esa raíz.
+  del archivo cuelgan de esa raíz. Si el archivo prueba un solo método, la raíz puede ser
+  `Clase.método` y adentro agrupar por tema (`'compra exitosa'`, `'validaciones'`).
 - **`describe` en los tests de infraestructura** (repositorios, conexión, controller, adaptadores):
   alcanza con un `describe` por clase.
 - **`it`:** una frase en presente que describe el comportamiento observable, por ejemplo
@@ -744,7 +663,7 @@ it.each<[number, TipoPase, number]>([
     visita y `enCordoba(anio, mes, dia, hora, minuto)` para el instante `ahora`, armado en UTC-3.
   - Para probar que una regla no depende de la zona del proceso, el `describe` fija
     `process.env.TZ = 'UTC'` en `beforeEach` y lo restaura en `afterEach`.
-  - En el resto se usa `new Date(a, m - 1, d)` con el día de la semana en un comentario.
+  - En el resto se usa `new Date(a, m - 1, d)`.
   - Para fijar "hoy" en integración: `vi.useFakeTimers({ toFake: ['Date'] })` más `vi.setSystemTime`.
 - **Recursos:** se cierran en `afterEach` (`conexion.cerrar()`, `servidor.close()`).
 - **Omitir un campo obligatorio a propósito:** se usa `// @ts-expect-error: <motivo>`.
@@ -758,17 +677,21 @@ ISW_TP6/
 ├── CONVENCIONES.md                  ← Convenciones acordadas con el PO y la cátedra
 ├── guia_estilo_tp6.md               ← Este documento
 ├── .prettierrc.json / .oxlintrc.json ← Formato y lint compartidos por backend y frontend
-├── docker-compose.yml               ← Backend + frontend (nginx) con healthchecks
+├── .env.example                     ← Plantilla del .env (EMAIL_DEMO y credenciales SMTP)
+├── .gitignore                       ← Ignora el .env de la raíz
+├── docker-compose.yml               ← Backend + frontend (nginx) con healthchecks; pasa el .env
 ├── backend/
+│   ├── Dockerfile                   ← Imagen de la API (bundle ESM con createRequire para qrcode y nodemailer)
 │   ├── bd/data/                     ← Archivo SQLite local (ignorado por git)
 │   ├── src/
-│   │   ├── main.ts                  ← Arranque: lee config, carga datos iniciales, levanta HTTP
-│   │   ├── aplicacion.ts            ← Raíz de composición: crea y conecta todas las dependencias
+│   │   ├── main.ts                  ← Arranque: lee config, elige adaptadores, carga datos iniciales, levanta HTTP
+│   │   ├── aplicacion.ts            ← Raíz de composición: crea y conecta servicios y repositorios
 │   │   ├── servidor-http.ts         ← Servidor node:http (POST /api/compras)
-│   │   ├── config/                  ← configuracion.ts + lectores <tema>.config.ts
+│   │   ├── config/                  ← configuracion.ts + lectores <tema>.config.ts (base de datos, servidor, simulación, mail)
 │   │   ├── infraestructura/bd/      ← Conexión, esquema DDL y datos iniciales de SQLite
 │   │   └── modules/
-│   │       ├── compras/             ← service, types, repository, controller, notificador-simulado
+│   │       ├── compras/             ← service, types, constants, repository, controller, notificador-simulado,
+│   │       │                          y el mail: qr, mail-confirmacion, mail.types, notificador-mail, transporte-smtp
 │   │       ├── pagos/               ← service, types, constants, pasarela-simulada
 │   │       ├── parque/              ← service
 │   │       └── usuarios/            ← repository
@@ -776,14 +699,18 @@ ISW_TP6/
 │       ├── <modulo>.service.test.ts ← Unitarios de los tres servicios
 │       ├── compras.integracion.test.ts
 │       ├── fakes/                   ← Fakes reutilizables
+│       ├── helpers/                 ← Helpers de test (leer-qr.ts)
 │       ├── infraestructura/bd/      ← Igual que src/
 │       └── modules/<modulo>/        ← Igual que src/
 └── frontend/
+    ├── Dockerfile                   ← Build de Vite servido por nginx
+    ├── nginx.conf                   ← Sirve el build y hace de proxy de /api al backend
     ├── index.html
     ├── public/logo-ecoharmony.png   ← Logo provisorio (pendiente de validación del PO, FAQ 17)
-    ├── vite.config.ts               ← Alias @backend y proxy /api → :3000
+    ├── vite.config.ts               ← Alias @backend, proxy /api → :3000 e inyección de EMAIL_DEMO
     └── src/
         ├── main.tsx                 ← Punto de entrada React
+        ├── vite-env.d.ts            ← Tipo de import.meta.env.EMAIL_DEMO
         ├── app/App.tsx              ← Shell: header y <main>
         ├── modules/compra/
         │   ├── CompraPage.tsx       ← Página y navegación entre pasos y pantallas
@@ -791,7 +718,7 @@ ISW_TP6/
         │   └── components/          ← Pasos, ficha, pantallas de resultado, modal y sello
         └── shared/
             ├── http/cliente.ts      ← Llamadas a la API (postJson, ErrorConexion)
-            ├── sesion/sesion.ts     ← Usuario de la sesión simulada
+            ├── sesion/sesion.ts     ← Usuario de la sesión simulada (EMAIL_DEMO)
             ├── styles/index.css     ← Tokens @theme y estilos base
             └── ui/                  ← Componentes y formatos reutilizables (Boton, Alerta, Calendario, formato)
 ```
@@ -818,7 +745,7 @@ ISW_TP6/
 | `backend/` | `npm test` | Corre toda la suite de Vitest |
 | `backend/` | `npm run test:watch` | Vitest en modo watch (ciclo RED, GREEN, REFACTOR) |
 | `backend/` | `npm run test:coverage` | Cobertura de los tres servicios (mínimo 90 % de líneas) |
-| `backend/` | `npm start` | Levanta la API en `127.0.0.1:3000` con SQLite y las simulaciones |
+| `backend/` | `npm start` | Levanta la API en `127.0.0.1:3000` con SQLite. Carga `../.env` si existe (mail real); si no, simula el mail |
 | `frontend/` | `npm run dev` | Vite en `:5173`, con proxy de `/api` al backend |
 | `frontend/` | `npm run build` | `tsc --noEmit` y build de producción |
 | los dos | `npm run lint` | oxlint con las reglas de `.oxlintrc.json` |
@@ -860,8 +787,17 @@ Si alguno queda en rojo, el PR no se mergea.
 ### Ramas
 
 - Hay una rama por paquete de trabajo, con el formato **`tp6/pN-nombre`**, como en `tp6/p3-tarifas`.
-- La integración a `main` se hace por PR o por merge, con un mensaje que nombra el paquete
-  (`Merge del paquete 6`).
+- Los cambios que no son un paquete de TDD (frontend, configuración, documentación) usan
+  **`tp6/<nombre>`**, sin número, como en `tp6/consistencia-estilo` (igual que `CONVENCIONES.md` §2.4).
+- La integración a `main` se hace por PR o por merge, con un mensaje que dice qué se integra: el
+  paquete (`Merge del paquete 6`) o el tema (`Alineacion de convenciones y guia de estilos`).
+
+### Alcance en el tiempo
+
+Las reglas de esta sección rigen desde el commit `be6e48c` (20/10/2026), que agrega esta guía. Los
+commits y las ramas anteriores quedan como están, porque reescribir el historial de `main` sería
+peor que el desvío. Eso incluye las ramas `compras_service-compra_exitosa` y `pr-7`, y el formato
+`Test <método> <módulo> - Test N - RED|GREEN|REFACTOR` de los primeros paquetes.
 
 ### Commits del ciclo (backend)
 
@@ -889,5 +825,5 @@ Un commit por paso, con el prefijo y el paquete. El mensaje describe el comporta
 
 ---
 
-*Guía de estilo del Trabajo Práctico 6 — ISW 4K1 · Grupo 1 · 2026. Describe el código de la rama
-`main` al 20/10/2026.*
+*Guía de estilo del Trabajo Práctico 6 — ISW 4K1 · Grupo 1 · 2026. Describe el código al
+25/10/2026.*
