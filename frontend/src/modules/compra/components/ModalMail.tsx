@@ -2,7 +2,7 @@ import { MailCheck } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { Boton } from '../../../shared/ui/Boton';
 
-// Simulación del envío de mail (FAQ 5): un modal que confirma a qué casilla se envió.
+// Confirma a qué casilla se envió el mail de la compra (FAQ 5).
 export const ModalMail = ({ email, alCerrar }: { email: string; alCerrar: () => void }) => {
   const dialogo = useRef<HTMLDialogElement>(null);
 
@@ -29,8 +29,8 @@ export const ModalMail = ({ email, alCerrar }: { email: string; alCerrar: () => 
       </h2>
       <p className="mt-2 text-[15px] leading-relaxed text-tinta-suave">
         Mandamos la confirmación a <strong className="font-bold text-tinta">{email}</strong> con el
-        número de orden, el detalle de visitantes, los subtotales, el total y el código QR de
-        acceso.
+        número de orden, el detalle de visitantes, los subtotales, el total y un código QR por
+        entrada.
       </p>
       <form method="dialog" className="mt-6">
         <Boton type="submit" ancho autoFocus>
