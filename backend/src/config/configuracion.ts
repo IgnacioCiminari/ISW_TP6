@@ -10,6 +10,14 @@ export const configuracion = {
   },
   simulacion: {
     urlPagoSimulado: 'https://pago.simulado/checkout',
-    emailUsuarioRegistrado: 'visitante@mail.com',
+    emailUsuarioRegistrado: process.env.EMAIL_DEMO ?? 'visitante@mail.com',
+  },
+  // Las credenciales se leen del .env de la raíz (ver .env.example).
+  mail: {
+    host: process.env.SMTP_HOST,
+    puerto: Number(process.env.SMTP_PUERTO ?? 587),
+    usuario: process.env.SMTP_USUARIO,
+    clave: process.env.SMTP_CLAVE,
+    remitente: process.env.MAIL_REMITENTE ?? 'EcoHarmony Park <ecoharmonypark1@gmail.com>',
   },
 } as const;

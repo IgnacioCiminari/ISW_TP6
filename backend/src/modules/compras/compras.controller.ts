@@ -90,6 +90,8 @@ export class CompraController {
       if (error instanceof Error && MENSAJES_DE_REGLA.has(error.message)) {
         return { estado: 422, cuerpo: { error: error.message } };
       }
+      // Al cliente no se le muestra el detalle, pero tiene que quedar en el log del servidor.
+      console.error('Error inesperado al comprar entradas:', error);
       return { estado: 500, cuerpo: { error: 'Error interno.' } };
     }
   }

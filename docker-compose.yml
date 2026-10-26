@@ -1,6 +1,10 @@
 services:
   backend:
     build: ./backend
+    # Credenciales SMTP y mail de la demo. Sin .env el mail se simula.
+    env_file:
+      - path: .env
+        required: false
     volumes:
       - datos-bd:/app/bd/data
     restart: unless-stopped
@@ -17,6 +21,9 @@ services:
       context: ./frontend
       additional_contexts:
         backend: ./backend
+      # La sesión simulada del front usa el mismo usuario que registra el backend.
+      args:
+        EMAIL_DEMO: ${EMAIL_DEMO:-visitante@mail.com}
     ports:
       - "8080:80"
     depends_on:

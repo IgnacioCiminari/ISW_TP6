@@ -1,16 +1,30 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Server } from 'node:http';
 import { crearAplicacion } from '../../../src/aplicacion';
+import { NotificadorMail } from '../../../src/modules/compras/compras.notificador-mail';
+import type { DependenciasCompras } from '../../../src/modules/compras/compras.types';
 import { crearServidor } from '../../../src/servidor-http';
 import { NotificadorFalso } from '../../fakes/notificador.falso';
 import { PasarelaPagoFalsa } from '../../fakes/pasarela-pago.falsa';
+import { TransporteMailFalso } from '../../fakes/transporte-mail.falso';
+import { leerQR } from '../../helpers/leer-qr';
 
-const crearSistemaDePrueba = async () => {
+const SOLICITUD_VALIDA = {
+  email: 'visitante@mail.com',
+  fechaVisita: '2026-10-20',
+  cantidad: 2,
+  visitantes: [
+    { edad: 35, tipoPase: 'VIP' },
+    { edad: 10, tipoPase: 'REGULAR' },
+  ],
+  formaPago: 'TARJETA',
+};
+
+const crearSistemaDePrueba = async (notificador: DependenciasCompras['notificador']) => {
   const pasarela = new PasarelaPagoFalsa({
     id: 'PREF-PRUEBA',
     urlRedireccion: 'https://pago.simulado/checkout',
   });
-  const notificador = new NotificadorFalso();
   const aplicacion = crearAplicacion({ ruta: ':memory:', pasarela, notificador });
   aplicacion.conexion.baseDatos
     .prepare('INSERT INTO usuarios(email) VALUES (?)')
@@ -23,7 +37,6 @@ const crearSistemaDePrueba = async () => {
     aplicacion,
     servidor,
     pasarela,
-    notificador,
     url: `http://127.0.0.1:${direccion.port}/api/compras`,
   };
 };
@@ -48,24 +61,16 @@ describe('POST /api/compras integrado', () => {
   });
 
   it('persiste la compra y devuelve el pago con tarjeta simulado', async () => {
-    const sistema = await crearSistemaDePrueba();
-    const { aplicacion, pasarela, notificador } = sistema;
+    const notificador = new NotificadorFalso();
+    const sistema = await crearSistemaDePrueba(notificador);
+    const { aplicacion, pasarela } = sistema;
     cerrarBaseDatos = () => aplicacion.conexion.cerrar();
     servidor = sistema.servidor;
 
     const respuesta = await fetch(sistema.url, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        email: 'visitante@mail.com',
-        fechaVisita: '2026-10-20',
-        cantidad: 2,
-        visitantes: [
-          { edad: 35, tipoPase: 'VIP' },
-          { edad: 10, tipoPase: 'REGULAR' },
-        ],
-        formaPago: 'TARJETA',
-      }),
+      body: JSON.stringify(SOLICITUD_VALIDA),
     });
     const cuerpo = (await respuesta.json()) as {
       numeroOrden: string;
@@ -98,6 +103,33 @@ describe('POST /api/compras integrado', () => {
           ],
         }),
       }),
+    ]);
+  });
+
+  // Toda la cadena real hasta el mail armado: solo se reemplaza la salida SMTP.
+  it('envía al comprador el mail de confirmación con un QR legible por entrada', async () => {
+    const transporte = new TransporteMailFalso();
+    const sistema = await crearSistemaDePrueba(
+      new NotificadorMail(transporte, 'EcoHarmony Park <ecoharmonypark1@gmail.com>'),
+    );
+    cerrarBaseDatos = () => sistema.aplicacion.conexion.cerrar();
+    servidor = sistema.servidor;
+
+    const respuesta = await fetch(sistema.url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(SOLICITUD_VALIDA),
+    });
+    const cuerpo = (await respuesta.json()) as { numeroOrden: string };
+
+    expect(respuesta.status).toBe(201);
+    expect(transporte.llamadas).toHaveLength(1);
+    const [mail] = transporte.llamadas;
+    expect(mail!.para).toBe('visitante@mail.com');
+    expect(mail!.asunto).toContain(cuerpo.numeroOrden);
+    expect(mail!.adjuntos.map((adjunto) => leerQR(adjunto.contenido))).toEqual([
+      `QR-${cuerpo.numeroOrden}-1`,
+      `QR-${cuerpo.numeroOrden}-2`,
     ]);
   });
 });
