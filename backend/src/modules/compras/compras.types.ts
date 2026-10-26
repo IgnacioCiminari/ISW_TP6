@@ -44,6 +44,12 @@ export interface ResultadoCompra {
   pago: ResultadoPago;
 }
 
+export interface MensajeMail {
+  de: string;
+  para: string;
+  asunto: string;
+}
+
 // Colaboradores inyectados por constructor. Se agregan a medida que los tests los piden.
 export interface DependenciasCompras {
   usuarios: {
