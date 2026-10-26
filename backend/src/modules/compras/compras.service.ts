@@ -33,7 +33,10 @@ export class ComprasService {
       cantidadEntradas: cantidad,
       formaPago,
       detalle,
-      codigoQR: this.generarCodigoQR(numeroOrden),
+      entradas: detalle.subtotales.map((subtotal) => ({
+        ...subtotal,
+        codigoQR: this.generarCodigoQR(numeroOrden),
+      })),
     });
 
     return {

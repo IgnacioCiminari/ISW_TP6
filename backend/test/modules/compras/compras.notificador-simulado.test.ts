@@ -12,7 +12,7 @@ describe('NotificadorSimulado', () => {
         cantidadEntradas: 1,
         formaPago: 'EFECTIVO',
         detalle: { subtotales: [], total: 0 },
-        codigoQR: 'QR-ORD-123',
+        entradas: [],
       }),
     ).resolves.toBeUndefined();
   });

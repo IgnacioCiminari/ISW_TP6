@@ -1,4 +1,10 @@
-import type { DetallePrecio, FormaPago, ResultadoPago, Visitante } from '../pagos/pagos.types';
+import type {
+  DetallePrecio,
+  FormaPago,
+  ResultadoPago,
+  Subtotal,
+  Visitante,
+} from '../pagos/pagos.types';
 
 export interface SolicitudCompra {
   email: string;
@@ -16,13 +22,18 @@ export interface NuevaCompra {
   detalle: DetallePrecio;
 }
 
+// Cada entrada lleva su propio QR de acceso.
+export interface EntradaConfirmada extends Subtotal {
+  codigoQR: string;
+}
+
 export interface ResumenCompra {
   numeroOrden: string;
   fechaVisita: Date;
   cantidadEntradas: number;
   formaPago: FormaPago;
   detalle: DetallePrecio;
-  codigoQR: string;
+  entradas: EntradaConfirmada[];
 }
 
 export interface ResultadoCompra {

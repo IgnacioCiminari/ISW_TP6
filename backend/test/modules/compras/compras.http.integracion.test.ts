@@ -88,7 +88,14 @@ describe('POST /api/compras integrado', () => {
         resumen: expect.objectContaining({
           numeroOrden: cuerpo.numeroOrden,
           cantidadEntradas: 2,
-          codigoQR: `QR-${cuerpo.numeroOrden}`,
+          entradas: [
+            expect.objectContaining({ edad: 35, tipoPase: 'VIP', codigoQR: expect.any(String) }),
+            expect.objectContaining({
+              edad: 10,
+              tipoPase: 'REGULAR',
+              codigoQR: expect.any(String),
+            }),
+          ],
         }),
       }),
     ]);
