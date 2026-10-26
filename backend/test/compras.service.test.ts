@@ -150,6 +150,18 @@ describe('ComprasService.comprarEntradas', () => {
       ]);
     });
 
+    it('cada entrada tiene un código QR distinto que referencia la orden', async () => {
+      const deps = crearDependencias();
+      const servicio = new ComprasService(deps);
+
+      await servicio.comprarEntradas(solicitudValida());
+
+      const [, resumen] = deps.notificador.enviarConfirmacion.mock.calls[0]!;
+      const codigos = resumen.entradas.map((entrada) => entrada.codigoQR);
+      expect(new Set(codigos).size).toBe(codigos.length);
+      for (const codigo of codigos) expect(codigo).toContain('ORD-0001');
+    });
+
     it('valida la fecha de visita contra las reglas del parque', async () => {
       const deps = crearDependencias();
       const servicio = new ComprasService(deps);
