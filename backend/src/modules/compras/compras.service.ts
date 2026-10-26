@@ -33,9 +33,9 @@ export class ComprasService {
       cantidadEntradas: cantidad,
       formaPago,
       detalle,
-      entradas: detalle.subtotales.map((subtotal) => ({
+      entradas: detalle.subtotales.map((subtotal, indice) => ({
         ...subtotal,
-        codigoQR: this.generarCodigoQR(numeroOrden),
+        codigoQR: this.generarCodigoQR(numeroOrden, indice + 1),
       })),
     });
 
@@ -122,7 +122,7 @@ export class ComprasService {
     return this.deps.notificador.enviarConfirmacion(email, resumen);
   }
 
-  private generarCodigoQR(numeroOrden: string): string {
-    return `${PREFIJO_QR}${numeroOrden}`;
+  private generarCodigoQR(numeroOrden: string, numeroEntrada: number): string {
+    return `${PREFIJO_QR}${numeroOrden}-${numeroEntrada}`;
   }
 }
