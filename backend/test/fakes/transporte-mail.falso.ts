@@ -1,4 +1,4 @@
-import type { MensajeMail, TransporteMail } from '../../src/modules/compras/compras.types';
+import type { MensajeMail, TransporteMail } from '../../src/modules/compras/compras.mail.types';
 
 export class TransporteMailFalso implements TransporteMail {
   enviados: MensajeMail[] = [];

@@ -1,6 +1,7 @@
 import { armarMailConfirmacion } from './compras.mail-confirmacion';
 import { generarImagenQR } from './compras.qr';
-import type { DependenciasCompras, ResumenCompra, TransporteMail } from './compras.types';
+import type { TransporteMail } from './compras.mail.types';
+import type { DependenciasCompras, ResumenCompra } from './compras.types';
 
 type Notificador = DependenciasCompras['notificador'];
 
