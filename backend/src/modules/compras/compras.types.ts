@@ -48,6 +48,8 @@ export interface MensajeMail {
   de: string;
   para: string;
   asunto: string;
+  html: string;
+  texto: string;
 }
 
 // Colaboradores inyectados por constructor. Se agregan a medida que los tests los piden.
