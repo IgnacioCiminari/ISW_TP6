@@ -44,6 +44,22 @@ export interface ResultadoCompra {
   pago: ResultadoPago;
 }
 
+// Imagen embebida en el HTML: el cuerpo la referencia con `<img src="cid:...">`.
+export interface AdjuntoMail {
+  nombre: string;
+  contenido: Buffer;
+  cid: string;
+}
+
+export interface MensajeMail {
+  de: string;
+  para: string;
+  asunto: string;
+  html: string;
+  texto: string;
+  adjuntos: AdjuntoMail[];
+}
+
 // Colaboradores inyectados por constructor. Se agregan a medida que los tests los piden.
 export interface DependenciasCompras {
   usuarios: {
