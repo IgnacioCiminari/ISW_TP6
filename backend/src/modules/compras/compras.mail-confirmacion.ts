@@ -1,5 +1,5 @@
 import type { FormaPago, TipoPase } from '../pagos/pagos.types';
-import type { EntradaConfirmada, MensajeMail, ResumenCompra } from './compras.types';
+import type { AdjuntoMail, EntradaConfirmada, MensajeMail, ResumenCompra } from './compras.types';
 
 interface DatosMailConfirmacion {
   remitente: string;
@@ -41,7 +41,10 @@ const describirEntrada = (entrada: EntradaConfirmada): string[] => [
   `${entrada.edad} años`,
   NOMBRE_PASE[entrada.tipoPase],
   formatearPrecio(entrada.precio),
+  entrada.codigoQR,
 ];
+
+const cidDelQR = (indice: number): string => `qr-${indice + 1}@ecoharmonypark`;
 
 const armarTexto = (resumen: ResumenCompra): string =>
   [
@@ -67,23 +70,32 @@ const armarHtml = (resumen: ResumenCompra): string => `
 <table>
   ${resumen.entradas
     .map(
-      (entrada) =>
+      (entrada, indice) =>
         `<tr>${describirEntrada(entrada)
           .map((dato) => `<td>${dato}</td>`)
-          .join('')}</tr>`,
+          .join('')}<td><img src="cid:${cidDelQR(indice)}" alt="QR ${entrada.codigoQR}"></td></tr>`,
     )
     .join('\n  ')}
   <tr><td>Total</td><td>${FORMATO_PESOS.format(resumen.detalle.total)}</td></tr>
 </table>`;
 
+const armarAdjuntos = (entradas: EntradaConfirmada[], imagenesQR: Buffer[]): AdjuntoMail[] =>
+  entradas.map((entrada, indice) => ({
+    nombre: `${entrada.codigoQR}.png`,
+    contenido: imagenesQR[indice],
+    cid: cidDelQR(indice),
+  }));
+
 export const armarMailConfirmacion = ({
   remitente,
   para,
   resumen,
+  imagenesQR,
 }: DatosMailConfirmacion): MensajeMail => ({
   de: remitente,
   para,
   asunto: `Confirmación de tu compra ${resumen.numeroOrden} · EcoHarmony Park`,
   html: armarHtml(resumen),
   texto: armarTexto(resumen),
+  adjuntos: armarAdjuntos(resumen.entradas, imagenesQR),
 });
