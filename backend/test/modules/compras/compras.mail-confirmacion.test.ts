@@ -86,6 +86,30 @@ describe('armarMailConfirmacion', () => {
     for (const cuerpo of cuerpos(mail)) expect(cuerpo).toContain(textoEsperado);
   });
 
+  it('adjunta la imagen del QR de cada entrada', () => {
+    const mail = armar();
+
+    expect(mail.adjuntos).toEqual([
+      { nombre: 'QR-ORD-123-1.png', contenido: IMAGENES_QR[0], cid: expect.any(String) },
+      { nombre: 'QR-ORD-123-2.png', contenido: IMAGENES_QR[1], cid: expect.any(String) },
+      { nombre: 'QR-ORD-123-3.png', contenido: IMAGENES_QR[2], cid: expect.any(String) },
+    ]);
+  });
+
+  it('muestra cada QR dentro del HTML con su propio cid', () => {
+    const mail = armar();
+
+    const cids = mail.adjuntos.map((adjunto) => adjunto.cid);
+    expect(new Set(cids).size).toBe(cids.length);
+    for (const cid of cids) expect(mail.html).toContain(`<img src="cid:${cid}"`);
+  });
+
+  it('el texto plano indica el código de cada entrada', () => {
+    const mail = armar();
+
+    for (const entrada of RESUMEN.entradas) expect(mail.texto).toContain(entrada.codigoQR);
+  });
+
   // En Docker el proceso corre en UTC: la fecha de visita es un día de calendario y no se corre.
   describe('con el proceso en UTC', () => {
     const zonaOriginal = process.env.TZ;
