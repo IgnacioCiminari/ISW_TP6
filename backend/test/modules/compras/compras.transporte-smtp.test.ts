@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { describe, expect, it, vi } from 'vitest';
 import { TransporteSmtp } from '../../../src/modules/compras/compras.transporte-smtp';
-import type { MensajeMail } from '../../../src/modules/compras/compras.types';
+import type { MensajeMail } from '../../../src/modules/compras/compras.mail.types';
 
 const MENSAJE: MensajeMail = {
   de: 'EcoHarmony Park <ecoharmonypark1@gmail.com>',

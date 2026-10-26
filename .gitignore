@@ -1,0 +1,2 @@
+# Credenciales SMTP y mail de la demo: cada uno arma el suyo a partir de .env.example.
+.env

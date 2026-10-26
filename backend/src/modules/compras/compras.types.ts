@@ -44,28 +44,6 @@ export interface ResultadoCompra {
   pago: ResultadoPago;
 }
 
-// Imagen embebida en el HTML: el cuerpo la referencia con `<img src="cid:...">`.
-export interface AdjuntoMail {
-  nombre: string;
-  contenido: Buffer;
-  cid: string;
-}
-
-export interface MensajeMail {
-  de: string;
-  para: string;
-  asunto: string;
-  html: string;
-  texto: string;
-  adjuntos: AdjuntoMail[];
-}
-
-// Puerto hacia el servidor de mail: en los tests se reemplaza por un fake,
-// en producción se implementa con SMTP.
-export interface TransporteMail {
-  enviar(mensaje: MensajeMail): Promise<void>;
-}
-
 // Colaboradores inyectados por constructor. Se agregan a medida que los tests los piden.
 export interface DependenciasCompras {
   usuarios: {

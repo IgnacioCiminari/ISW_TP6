@@ -1,5 +1,6 @@
 import type { FormaPago, TipoPase } from '../pagos/pagos.types';
-import type { AdjuntoMail, EntradaConfirmada, MensajeMail, ResumenCompra } from './compras.types';
+import type { AdjuntoMail, MensajeMail } from './compras.mail.types';
+import type { EntradaConfirmada, ResumenCompra } from './compras.types';
 
 interface DatosMailConfirmacion {
   remitente: string;

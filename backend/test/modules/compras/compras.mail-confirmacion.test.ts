@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { armarMailConfirmacion } from '../../../src/modules/compras/compras.mail-confirmacion';
-import type { MensajeMail, ResumenCompra } from '../../../src/modules/compras/compras.types';
+import type { MensajeMail } from '../../../src/modules/compras/compras.mail.types';
+import type { ResumenCompra } from '../../../src/modules/compras/compras.types';
 
 const REMITENTE = 'EcoHarmony Park <ecoharmonypark1@gmail.com>';
 const EMAIL = 'visitante@mail.com';

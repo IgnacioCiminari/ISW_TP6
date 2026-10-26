@@ -1,5 +1,5 @@
 import type { Transporter } from 'nodemailer';
-import type { MensajeMail, TransporteMail } from './compras.types';
+import type { MensajeMail, TransporteMail } from './compras.mail.types';
 
 // Recibe el transportador de nodemailer ya configurado: SMTP en producción,
 // jsonTransport en los tests.

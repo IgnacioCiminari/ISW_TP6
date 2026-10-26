@@ -6,6 +6,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY --from=backend src /app/backend/src
 COPY . .
+# vite.config.ts lo inyecta como el email de la sesión simulada.
+ARG EMAIL_DEMO
 RUN npm run build
 
 # Etapa 2: nginx sirve los estáticos y hace de proxy de /api al backend.
