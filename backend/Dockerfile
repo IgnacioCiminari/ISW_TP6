@@ -5,7 +5,10 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY tsconfig.json ./
 COPY src ./src
-RUN npx esbuild src/main.ts --bundle --platform=node --format=esm --outfile=dist/main.js
+# qrcode y nodemailer son CommonJS y hacen require() de módulos de Node: el banner
+# le da al bundle ESM un require real para que no falle con "Dynamic require".
+RUN npx esbuild src/main.ts --bundle --platform=node --format=esm --outfile=dist/main.js \
+  "--banner:js=import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);"
 
 # Etapa 2: solo Node y el bundle, sin node_modules.
 FROM node:24-alpine
